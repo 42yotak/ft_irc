@@ -1,12 +1,24 @@
 #pragma once
 
 #include <map>
-#include "Client.hpp"
+#include <vector>
+#include <sys/select.h> // fd_set
+#include <sys/socket.h> // sockaddr_in
+#include <netinet/in.h> // 이것도
+#include <netinet/ip.h>  // 이것도
+
+class Client;
+class Channel;
 
 class Server {
 	private:
-		std::map<int, Client&> clients;
+		std::map<int, Client*>	_clients;
+		std::vector<Channel*>		_channels;
+		fd_set									_readfds;
+		fd_set									_writefds;
+		int											_sockfd;
+		struct sockaddr_in			_servAddr;
+
 	public:
-		// 네트워크 부분 처리 socket, listen, recv, 등등
-		// fd로 찾은 client를 돌려주는 함수 필요
+		void initSocket();
 };
