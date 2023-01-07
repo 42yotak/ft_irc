@@ -10,25 +10,31 @@
 #include <arpa/inet.h>
 
 #include <iostream>
+#include <exception>
+
+#include <unistd.h>
+#include <cstring>
+
+#define ERROR -1
 
 class Client;
 class Channel;
 
 class Server {
 	private:
-		std::map<int, Client*>						_clients;
-		std::map<std::string, Channel*>		_channels;
-		fd_set														_readfds;
-		fd_set														_writefds;
-		int																_sockfd;
-		struct sockaddr_in								_servAddr;
+		std::map<int, Client>							_clients;
+		std::map<std::string, Channel>		_channels;
+		fd_set														_readFds;
+		fd_set														_writeFds;
+		int																_servSock;
+		struct sockaddr_in								_servAdr;
+		std::string												_port;
+		std::string												_password;
 
 	public:
 		Server(std::string port, std::string password);
 		~Server();
-		void on(std::string port, std::string password); // 직접 세팅
-		void on(void); //생성자로 들어오는 내부 변수 사용
-		void off(); // close(sockfd)
-		void freeVector(); // To.hyko 컨테이너 미리 익숙해지세요~
-		void freeMap();
+		void on(std::string port, std::string password);
+		void on();
+		void off();
 };
