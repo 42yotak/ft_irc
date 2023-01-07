@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Client.hpp"
 
 Server::Server(std::string port, std::string password) : _port(port), _password(password) {
 	this->_servSock = 0;
@@ -51,7 +52,7 @@ void Server::on(std::string port, std::string password) {
 			continue ;
 		// accept, maxFd처리
 		for (int fd = 0; fd < maxFd + 1; fd++) {
-			if (FD_ISSET(fd, &cpReadFds)) {
+			if (FD_ISSET(fd, &cpReadFds)) { // revc from client
 				if (fd == this->_servSock) { // accept call
 					try {
 						clientFd = accept(fd, (struct sockaddr *)&clientAdr, (socklen_t *)&clientLen);
@@ -60,6 +61,7 @@ void Server::on(std::string port, std::string password) {
 						}
 						FD_SET(clientFd, &this->_readFds);
 						FD_SET(clientFd, &this->_writeFds);
+						this->_clients.insert(std::make_pair(clientFd, Client()));
 						if (clientFd > maxFd) {
 							maxFd = clientFd;
 						}
@@ -67,11 +69,11 @@ void Server::on(std::string port, std::string password) {
 						std::cerr << e.what() << std::endl;
 					}
 				} else {
-
+					this->recv(fd);
 				}
 			}
-			if (FD_ISSET(fd, &cpWriteFds)) {
-
+			if (FD_ISSET(fd, &cpWriteFds)) { // send to client
+				this->send(fd);
 			}
 		}
 	}
