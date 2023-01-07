@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <algorithm>
 #include <vector>
 
 #include <sys/select.h>
@@ -37,4 +38,7 @@ class Server {
 		void on(std::string port, std::string password);
 		void on();
 		void off();
+
+		void recv(int fd);
+		void send(int fd);
 };
