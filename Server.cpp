@@ -33,6 +33,10 @@ void Server::on(std::string port, std::string password) {
 	int	selectFds;
 	int	maxFd;
 
+	// for accept()
+	struct sockaddr_in	clientAdr;
+	int									clientLen, clientFd = 0;
+
 	while(42) {
 		FD_COPY(&this->_readFds, &cpReadFds);
 		FD_COPY(&this->_writeFds, &cpWriteFds);
@@ -43,9 +47,33 @@ void Server::on(std::string port, std::string password) {
 		} catch(std::exception &e) {
 			std::cerr << e.what() << std::endl;
 		}
-			if (selectFds == 0)
-				continue;
-		// accept, maxFd처리		
+		if (selectFds == 0)
+			continue ;
+		// accept, maxFd처리
+		for (int fd = 0; fd < maxFd + 1; fd++) {
+			if (FD_ISSET(fd, &cpReadFds)) {
+				if (fd == this->_servSock) { // accept call
+					try {
+						clientFd = accept(fd, (struct sockaddr *)&clientAdr, (socklen_t *)&clientLen);
+						if (clientFd < 0) {
+							throw std::runtime_error("accept ");
+						}
+						FD_SET(clientFd, &this->_readFds);
+						FD_SET(clientFd, &this->_writeFds);
+						if (clientFd > maxFd) {
+							maxFd = clientFd;
+						}
+					} catch(std::exception &e) {
+						std::cerr << e.what() << std::endl;
+					}
+				} else {
+
+				}
+			}
+			if (FD_ISSET(fd, &cpWriteFds)) {
+
+			}
+		}
 	}
 }
 
