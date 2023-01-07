@@ -20,5 +20,9 @@ class Server {
 		struct sockaddr_in			_servAddr;
 
 	public:
+		Server();
+		~Server();
 		void initSocket();
+		void freeVector();
+		void freeMap();
 };
