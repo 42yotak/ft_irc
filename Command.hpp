@@ -1,6 +1,10 @@
 #pragma once
 
+#include "Protocol.hpp"
+
 class Command {
+	private:
+		Protocol _protocol;
 	public:
 		void ircPass();
 		void ircNick();
