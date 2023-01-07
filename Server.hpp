@@ -1,11 +1,15 @@
 #pragma once
 
+#include <string>
 #include <map>
 #include <vector>
-#include <sys/select.h> // fd_set
-#include <sys/socket.h> // sockaddr_in
-#include <netinet/in.h> // 이것도
-#include <netinet/ip.h>  // 이것도
+
+#include <sys/select.h>
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+#include <iostream>
 
 class Client;
 class Channel;
@@ -20,5 +24,11 @@ class Server {
 		struct sockaddr_in			_servAddr;
 
 	public:
-		void initSocket();
+		Server(std::string port, std::string password);
+		~Server();
+		void on(std::string port, std::string password); // 직접 세팅
+		void on(void); //생성자로 들어오는 내부 변수 사용
+		void off(); // close(sockfd)
+		void freeVector(); // To.hyko 컨테이너 미리 익숙해지세요~
+		void freeMap();
 };
