@@ -16,12 +16,12 @@ class Channel;
 
 class Server {
 	private:
-		std::map<int, Client*>	_clients;
-		std::vector<Channel*>		_channels;
-		fd_set									_readfds;
-		fd_set									_writefds;
-		int											_sockfd;
-		struct sockaddr_in			_servAddr;
+		std::map<int, Client*>						_clients;
+		std::map<std::string, Channel*>		_channels;
+		fd_set														_readfds;
+		fd_set														_writefds;
+		int																_sockfd;
+		struct sockaddr_in								_servAddr;
 
 	public:
 		Server(std::string port, std::string password);
