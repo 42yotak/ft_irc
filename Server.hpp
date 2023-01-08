@@ -37,12 +37,14 @@ class Server {
 		nick,
 		user,
 		ping,
+		quit,
+
 		join,
 		part,
-		privmsg,
+		kick,
+
 		notice,
-		quit,
-		kick
+		privmsg
 		*/
 	public:
 		Server(std::string port, std::string password);
