@@ -7,7 +7,7 @@
 int main(int argc, char *argv[]) {
 	(void) argc;
 	(void) argv;
-	Server serv = Server("6667", "127.0.0.1");
+	Server serv = Server("6667", "password");
 
 	serv.on();
 	serv.off();
