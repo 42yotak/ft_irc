@@ -6,6 +6,7 @@ INCLUDES	=	-I.
 RM			=	rm -f
 
 SRCS		=	main.cpp	\
+					Server.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 

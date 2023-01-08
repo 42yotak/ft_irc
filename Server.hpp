@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <sys/select.h>
+#include <sys/time.h>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -23,8 +24,8 @@ class Channel;
 
 class Server {
 	private:
-		std::map<int, Client>							_clients;
-		std::map<std::string, Channel>		_channels;
+		// std::map<int, Client>							_clients;
+		// std::map<std::string, Channel>		_channels;
 		fd_set														_readFds;
 		fd_set														_writeFds;
 		int																_servSock;
@@ -39,6 +40,6 @@ class Server {
 		void on();
 		void off();
 
-		void recv(int fd);
-		void send(int fd);
+		void servRecv(int fd);
+		void servSend(int fd);
 };
