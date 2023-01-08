@@ -12,6 +12,7 @@ class Channel {
 		std::map<int, Client>				_clients;
 		//방장 map.begin()
 	public:
+		Channel();
 		Channel(std::string name);
 		~Channel();
 };
