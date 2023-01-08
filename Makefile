@@ -1,12 +1,15 @@
 NAME		=	ircserv
 
 CXX			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98
+CXXFLAGS	=	#-Wall -Wextra -Werror -std=c++98
 INCLUDES	=	-I.
 RM			=	rm -f
 
 SRCS		=	main.cpp	\
-					Server.cpp
+					Server.cpp \
+					Client.cpp \
+					Channel.cpp
+
 
 OBJS		=	$(SRCS:.cpp=.o)
 

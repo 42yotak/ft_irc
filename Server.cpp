@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Client.hpp"
+#include "Channel.hpp"
 
 Server::Server(std::string port, std::string password) : _port(port), _password(password) {
 	this->_servSock = 0;
@@ -15,21 +16,22 @@ Server::~Server() {
 void Server::on(std::string port, std::string password) {
 	(void) password;
 	struct timeval timeout;
+	struct sockaddr_in servAdr;
 	timeout.tv_sec = 3;
 	timeout.tv_usec = 0;
 
 	this->_servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	bool option = true;
-	std::cout << "sockopt " << setsockopt( _servSock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) << std::endl;
+	// bool option = true;
+	// std::cout << "sockopt " << setsockopt( _servSock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) << std::endl;
 	std::cout << "this.servsock fron socket(): " << this->_servSock << std::endl;
-	memset(&this->_servAdr, 0, sizeof(_servAdr));
-	this->_servAdr.sin_family = AF_INET;
-	this->_servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
+	memset(&servAdr, 0, sizeof(servAdr));
+	servAdr.sin_family = AF_INET;
+	servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
 	std::cout << "port : " << atoi(port.c_str()) << std::endl;
-	this->_servAdr.sin_port = htons(atoi(port.c_str()));
+	servAdr.sin_port = htons(atoi(port.c_str()));
 
 	try {
-		if (bind(this->_servSock, (struct sockaddr*)&this->_servAdr, sizeof(_servAdr)) == ERROR)
+		if (bind(this->_servSock, (struct sockaddr*)&servAdr, sizeof(servAdr)) == ERROR)
 			throw std::runtime_error("bind ");
 		if (listen(_servSock, 42) == ERROR)
 			throw std::runtime_error("listen ");
@@ -77,7 +79,8 @@ void Server::on(std::string port, std::string password) {
 						}
 						FD_SET(clientFd, &this->_readFds);
 						FD_SET(clientFd, &this->_writeFds);
-						// this->_clients.insert(std::make_pair(clientFd, Client()));
+						Client newClient;
+						this->_clients.insert(std::make_pair(clientFd, newClient));
 						// ? welcome protocol in here?
 						// this->servRecv(this->_servSock);
 						if (clientFd > maxFd) {

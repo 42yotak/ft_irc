@@ -1,7 +1,5 @@
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "Command.hpp"
-#include "Protocol.hpp"
 #include "Server.hpp"
 
 int main(int argc, char *argv[]) {
