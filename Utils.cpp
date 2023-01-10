@@ -11,7 +11,7 @@ Command *callCommand() {
 	return command;
 }
 
-Server *callServer(std::string port="6667", std::string password="0000") {
+Server *callServer(std::string port, std::string password) {
 	static Server *server;
 
 	if (server == 0) {

@@ -21,11 +21,11 @@ char *Client::getBufWrite() {
 }
 
 void Client::setBufRead(char *buffer) {
-	strlcat(this->buf_read, buffer, strlen(buffer));
+	strlcat(this->buf_read, buffer, strlen(this->buf_read));
 }
 
 void Client::setBufWrite(char *buffer) {
-	strlcat(this->buf_write, buffer, strlen(buffer));
+	strlcat(this->buf_write, buffer, strlen(this->buf_read));
 }
 
 void Client::makeProtocol() {
