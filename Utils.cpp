@@ -1,4 +1,6 @@
 #include "Utils.hpp"
+#include "Command.hpp"
+#include "Server.hpp"
 
 Command *callCommand() {
 	static Command *command;
@@ -7,6 +9,15 @@ Command *callCommand() {
 		command = new Command();
 	}
 	return command;
+}
+
+Server *callServer(std::string port="6667", std::string password="0000") {
+	static Server *server;
+
+	if (server == 0) {
+		server = new Server(port, password);
+	}
+	return server;
 }
 
 std::vector<std::string>	split(std::string str, std::string delimiter) {
