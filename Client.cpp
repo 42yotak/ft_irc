@@ -4,8 +4,6 @@
 #include "Utils.hpp"
 
 Client::Client() {
-	this->_nickName = "(nickname)";
-	this->_userName = "(username)";
 	this->buf_read[0] = '\0';
 	this->buf_write[0] = '\0';
 }
