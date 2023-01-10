@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Utils.hpp"
 
 Server::Server(std::string port, std::string password) : _port(port), _password(password) {
 	this->_servSock = 0;
@@ -10,7 +11,8 @@ Server::Server(std::string port, std::string password) : _port(port), _password(
 }
 
 Server::~Server() {
-	// this->_clients.clear();
+	this->_clients.clear();
+	this->_channels.clear();
 }
 
 void Server::on(std::string port, std::string password) {
@@ -20,7 +22,8 @@ void Server::on(std::string port, std::string password) {
 	timeout.tv_sec = 3;
 	timeout.tv_usec = 0;
 
-	this->_servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if ((this->_servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == ERROR)
+		throw std::runtime_error("socket ");
 	// bool option = true;
 	// std::cout << "sockopt " << setsockopt( _servSock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) << std::endl;
 	std::cout << "this.servsock fron socket(): " << this->_servSock << std::endl;
@@ -30,14 +33,10 @@ void Server::on(std::string port, std::string password) {
 	std::cout << "port : " << atoi(port.c_str()) << std::endl;
 	servAdr.sin_port = htons(atoi(port.c_str()));
 
-	try {
-		if (bind(this->_servSock, (struct sockaddr*)&servAdr, sizeof(servAdr)) == ERROR)
-			throw std::runtime_error("bind ");
-		if (listen(_servSock, 42) == ERROR)
-			throw std::runtime_error("listen ");
-	} catch(std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
+	if (bind(this->_servSock, (struct sockaddr*)&servAdr, sizeof(servAdr)) == ERROR)
+		throw std::runtime_error("bind ");
+	if (listen(_servSock, 42) == ERROR)
+		throw std::runtime_error("listen ");
 	FD_SET(_servSock, &_readFds);
 
 	fd_set	cpReadFds;
@@ -68,7 +67,6 @@ void Server::on(std::string port, std::string password) {
 
 			// revc from client
 			if (FD_ISSET(fd, &cpReadFds)) {
-
 				// accept call
 				if (fd == this->_servSock) {
 					std::cout << "fd: " << fd << " servsock: " << this->_servSock << std::endl;
@@ -79,27 +77,26 @@ void Server::on(std::string port, std::string password) {
 						}
 						FD_SET(clientFd, &this->_readFds);
 						FD_SET(clientFd, &this->_writeFds);
-						Client newClient;
+
+						Client *newClient = new Client();
 						this->_clients.insert(std::make_pair(clientFd, newClient));
-						// ? welcome protocol in here?
-						// this->servRecv(this->_servSock);
 						if (clientFd > maxFd) {
 							maxFd = clientFd;
 						}
 					} catch(std::exception &e) {
 						std::cerr << e.what() << std::endl;
 					}
-
 				} else {
 					// TODO: read message
-					this->servRecv(fd);
+					Client *client = this->_clients[fd];
+					this->servRecv(fd, client->getBufRead());
+					client->makeProtocol();
 				}
 			}
-
-			// send to client
 			if (FD_ISSET(fd, &cpWriteFds)) {
-				// this->servSend(fd);
-				std::cout << "write!!" << std::endl;
+				// std::cout << "write!!" << std::endl;
+				// Client *client = this->_clients[fd];
+				//this->servSend(fd, client->getBufWrite());
 			}
 		}
 	}
@@ -113,18 +110,15 @@ void Server::off() {
 	close(_servSock);
 }
 
-void Server::servRecv(int fd) {
+void Server::servRecv(int fd, char *buf) {
 	ssize_t	nbytes;
-	char buf[512];
 
 	try {
 		nbytes = recv(fd, (void *)buf, 512, MSG_DONTWAIT);
 		std::cout << "nbytes: " << nbytes << std::endl;
 		if (nbytes > 512 || nbytes == ERROR) {
 			throw(std::runtime_error("recv message "));
-			// TODO : close fd, FD_CLR
 		}
-
 		// close request
 		if (nbytes == 0) {
 			FD_CLR(fd, &this->_readFds);
@@ -136,5 +130,5 @@ void Server::servRecv(int fd) {
 	}
 	buf[nbytes] = '\0';
 	std::string recvMsg(buf);
-	std::cout << recvMsg << std::endl;
+	std::cout << PURPLE << recvMsg << NC << std::endl;
 }
