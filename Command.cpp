@@ -29,7 +29,9 @@ void Command::cmdQuit(std::vector<std::string> buf_read, char *buf_write) {
 }
 
 void Command::cmdJoin(std::vector<std::string> buf_read, char *buf_write) {
-
+	// 공백으로 split
+	// comma로 split
+	// comma로 split한 각각을 channel로
 }
 void Command::cmdPart(std::vector<std::string> buf_read, char *buf_write) {
 

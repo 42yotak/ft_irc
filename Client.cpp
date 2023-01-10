@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Command.hpp"
 #include "Utils.hpp"
 
 Client::Client() {
