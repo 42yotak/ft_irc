@@ -1,10 +1,9 @@
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Command.hpp"
 #include "Utils.hpp"
 
 Client::Client() {
-	this->_nickName = "(nickname)";
-	this->_userName = "(username)";
 	this->buf_read[0] = '\0';
 	this->buf_write[0] = '\0';
 }
@@ -20,11 +19,11 @@ char *Client::getBufWrite() {
 }
 
 void Client::setBufRead(char *buffer) {
-	strlcat(this->buf_read, buffer, strlen(buffer));
+	strlcat(this->buf_read, buffer, strlen(this->buf_read));
 }
 
 void Client::setBufWrite(char *buffer) {
-	strlcat(this->buf_write, buffer, strlen(buffer));
+	strlcat(this->buf_write, buffer, strlen(this->buf_read));
 }
 
 void Client::makeProtocol() {

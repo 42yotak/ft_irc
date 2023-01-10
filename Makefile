@@ -8,7 +8,9 @@ RM			=	rm -f
 SRCS		=	main.cpp	\
 					Server.cpp \
 					Client.cpp \
-					Channel.cpp
+					Channel.cpp \
+					Command.cpp \
+					Utils.cpp
 
 
 OBJS		=	$(SRCS:.cpp=.o)

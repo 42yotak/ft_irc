@@ -8,6 +8,7 @@ int main(int argc, char *argv[]) {
 		std::cout << RED "./ircserv <port> <password>" NC "\n";
 	}
 
+
 	// Server serv = Server(argv[1], argv[2]);
 
 	try {
