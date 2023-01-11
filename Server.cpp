@@ -79,6 +79,7 @@ void Server::on(std::string port, std::string password) {
 				// accept call
 				if (fd == this->_servSock) {
 					std::cout << "fd: " << fd << " servsock: " << this->_servSock << std::endl;
+
 					try {
 						clientFd = accept(fd, (struct sockaddr *)&clientAdr, (socklen_t *)&clientLen);
 						if (clientFd < 0) {
@@ -87,7 +88,7 @@ void Server::on(std::string port, std::string password) {
 						FD_SET(clientFd, &this->_readFds);
 						FD_SET(clientFd, &this->_writeFds);
 
-						Client *newClient = new Client();
+						Client *newClient = new Client(clientFd);
 						this->_clients.insert(std::make_pair(clientFd, newClient));
 						if (clientFd > maxFd) {
 							maxFd = clientFd;
@@ -104,8 +105,8 @@ void Server::on(std::string port, std::string password) {
 			}
 			if (FD_ISSET(fd, &cpWriteFds)) {
 				// std::cout << "write!!" << std::endl;
-				// Client *client = this->_clients[fd];
-				//this->servSend(fd, client->getBufWrite());
+				Client *client = this->_clients[fd];
+				this->servSend(fd, client->getBufWrite());
 			}
 		}
 	}
@@ -119,13 +120,15 @@ void Server::off() {
 	close(_servSock);
 }
 
-void Server::servRecv(int fd, char *buf) {
+void Server::servRecv(int fd, std::string &buf_read) {
+	char		buf[512];
 	ssize_t	nbytes;
 
+	buf[0] = '\0';
 	try {
 		nbytes = recv(fd, (void *)buf, 512, MSG_DONTWAIT);
 		std::cout << "nbytes: " << nbytes << std::endl;
-		if (nbytes > 512 || nbytes == ERROR) {
+		if (nbytes > 510 || nbytes == ERROR) {
 			throw(std::runtime_error("recv message "));
 		}
 		// close request
@@ -138,6 +141,27 @@ void Server::servRecv(int fd, char *buf) {
 		std::cerr << e.what() << std::endl;
 	}
 	buf[nbytes] = '\0';
-	std::string recvMsg(buf);
-	std::cout << PURPLE << recvMsg << NC << std::endl;
+	// std::string recvMsg(buf);
+	// std::cout << PURPLE << recvMsg << NC << std::endl;
+	buf_read += std::string(buf);
+	std::cout << PURPLE << buf << NC;
+}
+
+void Server::servSend(int fd, std::string &buf_write) {
+	try {
+		if (send(fd, buf_write.c_str(), buf_write.length(), 0)) {
+			throw std::runtime_error("send message");
+		}
+		buf_write.clear();
+	} catch(std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
+}
+
+std::string	Server::getPassword() const {
+	return this->_password;
+}
+
+void Server::removeClient(int fd) {
+	this->_clients.erase(fd);
 }

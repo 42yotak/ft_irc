@@ -18,6 +18,7 @@
 #include <cstring>
 
 #define ERROR -1
+#define SERVER_NAME "PokémonGo"
 
 class Client;
 class Channel;
@@ -50,5 +51,10 @@ class Server {
 		void on();
 		void off();
 
-		void servRecv(int fd, char *buf);
+		void servRecv(int fd, std::string &buf_read);
+		void servSend(int fd, std::string &buf_write);
+
+		std::string	getPassword() const;
+
+		void removeClient(int fd);
 };

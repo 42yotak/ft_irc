@@ -5,28 +5,46 @@
 #include <string>
 #include <exception>
 
+#define PASS 1
+#define NICK 2
+#define USER 4
+
 class Channel;
 
 class Client {
 	private:
-		char buf_read[512];
-		char buf_write[512];
-		bool															_isVerified;
+		int																_fd;
+		std::string												buf_read;
+		std::string												buf_write;
+
+		int																_isRegistered;
 		std::string												_nickName;
 		std::string												_userName;
-		std::map <std::string, Channel *>	_channels;
+		std::string												_realName;
+		std::map<std::string, Channel *>	_channels;
 
 	public:
-		Client();
+		Client(int fd);
 		~Client();
 
-		char *getBufRead();
-		char *getBufWrite();
-		bool getIsVerified();
+		std::string &getBufRead();
+		std::string &getBufWrite();
+		int		getIsRegistered() const;
+		int		getFd() const;
+		const std::string	&getNickName() const;
+		const std::string	&getUserName() const;
+		const std::string	&getRealName() const;
 
-		void setBufRead(char *buffer);
-		void setBufWrite(char *buffer);
-		void setIsVerified(bool verified);
+		void	setBufRead(const std::string &msg);
+		void	setBufWrite(const std::string &msg);
+		void	setIsRegistered(int cmd);
+		void	setNickName(const std::string &nickName);
+		void	setUserName(const std::string &userName);
+		void	setRealName(const std::string &realName);
 
-		void makeProtocol();
+		void	makeProtocol();
+
+		// useless?
+		void clearBufRead();
+		void clearBufWrite();
 };

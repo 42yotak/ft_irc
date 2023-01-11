@@ -25,7 +25,11 @@ std::vector<std::string>	split(std::string str, std::string delimiter) {
 	size_t pos = 0;
 	// CAP LS\r\nPASS \r\nNICK \r\nUSER \r\n
 	while ((pos = str.find(delimiter)) != std::string::npos) {
-		ret.push_back(str.substr(0, pos + delimiter.length()));
+		if (str[0] == ':') {
+			ret.push_back(str.substr(1, std::string::npos));
+			break;
+		}
+		ret.push_back(str.substr(0, pos));
 		str.erase(0, pos + delimiter.length());
 	}
 	return (ret);
