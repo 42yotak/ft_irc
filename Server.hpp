@@ -34,15 +34,16 @@ class Server {
 		std::string												_port;
 		std::string												_password;
 
+		Server();
 		Server(std::string port, std::string password);
 		~Server();
 
 	public:
 		static Server &callServer(std::string port = "6667", std::string password = "0000") {
-			if (Server::_server == NULL) {
-				Server::_server = new Server(port, password);
+			if (_server == NULL) {
+				_server = new Server(port, password);
 			}
-			return *Server::_server;
+			return *_server;
 		}
 
 		void on(std::string port, std::string password);

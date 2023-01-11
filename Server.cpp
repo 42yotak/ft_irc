@@ -3,7 +3,16 @@
 #include "Channel.hpp"
 #include "Utils.hpp"
 
+Server *Server::_server = NULL;
+
 Server::Server(std::string port, std::string password) : _port(port), _password(password) {
+	this->_servSock = 0;
+
+	FD_ZERO(&this->_readFds);
+	FD_ZERO(&this->_writeFds);
+}
+
+Server::Server() {
 	this->_servSock = 0;
 
 	FD_ZERO(&this->_readFds);
