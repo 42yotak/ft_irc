@@ -18,6 +18,10 @@ char *Client::getBufWrite() {
 	return this->buf_write;
 }
 
+bool Client::getIsVerified() {
+	return this->_isVerified;
+}
+
 void Client::setBufRead(char *buffer) {
 	strlcat(this->buf_read, buffer, strlen(this->buf_read));
 }
@@ -26,11 +30,15 @@ void Client::setBufWrite(char *buffer) {
 	strlcat(this->buf_write, buffer, strlen(this->buf_read));
 }
 
+void Client::setIsVerified(bool verified) {
+	this->_isVerified = verified;
+}
+
 void Client::makeProtocol() {
 	std::vector<std::string> cmds;
 
 	cmds = split(std::string(this->buf_read), "\r\n");
-	// Welcome
+	// cmds
 	// CAP LS \r\n
 	// PASS \r\n
 	// USER \r\n
@@ -42,11 +50,13 @@ void Client::makeProtocol() {
 	std::vector<std::string>::iterator ite = cmds.end();
 	while (it != ite) {
 		std::vector<std::string> cmd = split((*it), " ");
-		if (cmd[0] == "CAP") {
-			callCommand()->cmdWelcome(cmds, this->buf_write);
+		if (cmd[0] == "PASS") {
+			callCommand()->cmdPass(cmds, this->buf_write);
 		} else if (cmd[0] == "NICK") {
 			callCommand()->cmdNick(cmds, this->buf_write);
-		} else if (cmd[0] == "PING") {
+		} else if (cmd[0] == "USER") {
+			callCommand()->cmdUser(cmds, this->buf_write);
+		}  else if (cmd[0] == "PING") {
 			callCommand()->cmdPing(cmds, this->buf_write);
 		} else if (cmd[0] == "QUIT") {
 			callCommand()->cmdQuit(cmds, this->buf_write);

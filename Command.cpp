@@ -8,18 +8,14 @@ Command::~Command() {
 
 }
 
-void Command::cmdWelcome(std::vector<std::string> buf_read, char *buf_write) {
-
-}
-
 void Command::cmdPass(std::vector<std::string> buf_read, char *buf_write) {
-
+// hyko
 }
 void Command::cmdNick(std::vector<std::string> buf_read, char *buf_write) {
-
+// yuhwang
 }
 void Command::cmdUser(std::vector<std::string> buf_read, char *buf_write) {
-
+// yotak
 }
 void Command::cmdPing(std::vector<std::string> buf_read, char *buf_write) {
 

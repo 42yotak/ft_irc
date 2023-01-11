@@ -7,7 +7,6 @@ class Command {
 		Command();
 		~Command();
 
-		void cmdWelcome(std::vector<std::string> buf_read, char *buf_write);
 		void cmdPass(std::vector<std::string> buf_read, char *buf_write);
 		void cmdNick(std::vector<std::string> buf_read, char *buf_write);
 		void cmdUser(std::vector<std::string> buf_read, char *buf_write);
