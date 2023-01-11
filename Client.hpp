@@ -13,7 +13,7 @@ class Client {
 		char buf_write[512];
 		std::string												_nickName;
 		std::string												_userName;
-		std::map <std::string, Channel *> _channels;
+		std::map <std::string, Channel *>	_channels;
 
 	public:
 		Client();

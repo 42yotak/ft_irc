@@ -15,6 +15,6 @@ class Server;
 
 Command *callCommand();
 
-Server *callServer(std::string port="6667", std::string password="0000");
+// Server *callServer(std::string port="6667", std::string password="0000");
 
 std::vector<std::string>	split(std::string str, std::string delimiter);

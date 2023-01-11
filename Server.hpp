@@ -24,6 +24,8 @@ class Channel;
 
 class Server {
 	private:
+		static Server *_server;
+
 		std::map<int, Client *>						_clients;
 		std::map<std::string, Channel *>	_channels;
 		fd_set														_readFds;
@@ -32,9 +34,18 @@ class Server {
 		std::string												_port;
 		std::string												_password;
 
-	public:
+		Server();
 		Server(std::string port, std::string password);
 		~Server();
+
+	public:
+		static Server &callServer(std::string port = "6667", std::string password = "0000") {
+			if (_server == NULL) {
+				_server = new Server(port, password);
+			}
+			return *_server;
+		}
+
 		void on(std::string port, std::string password);
 		void on();
 		void off();

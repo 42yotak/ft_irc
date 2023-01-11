@@ -11,14 +11,14 @@ Command *callCommand() {
 	return command;
 }
 
-Server *callServer(std::string port, std::string password) {
-	static Server *server;
+// Server *callServer(std::string port, std::string password) {
+// 	static Server *server;
 
-	if (server == 0) {
-		server = new Server(port, password);
-	}
-	return server;
-}
+// 	if (server == 0) {
+// 		server = new Server(port, password);
+// 	}
+// 	return server;
+// }
 
 std::vector<std::string>	split(std::string str, std::string delimiter) {
 	std::vector<std::string> ret;
