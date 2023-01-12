@@ -5,12 +5,16 @@
 
 Client::Client(int fd) {
 	this->_fd = fd;
+
 	this->_isRegistered = 0;
 	this->buf_read[0] = '\0';
 	this->buf_write[0] = '\0';
+
 	this->_nickName = "*";
 	this->_userName = "*";
 	this->_realName = "*";
+
+	this->_isDead = false;
 }
 
 Client::~Client() {
@@ -44,6 +48,10 @@ const std::string	&Client::getRealName() const {
 	return this->_realName;
 }
 
+bool Client::getIsDead() const {
+	return this->_isDead;
+}
+
 // void Client::setBufRead(const std::string &msg) {
 // 	// strlcat(this->buf_read, msg, strlen(this->buf_read));
 // 	this->buf_read += msg;
@@ -68,6 +76,10 @@ void	Client::setUserName(const std::string &userName) {
 
 void	Client::setRealName(const std::string &realName) {
 	this->_realName = realName;
+}
+
+void Client::setIsDead() {
+	this->_isDead = true;
 }
 
 void Client::makeProtocol() {

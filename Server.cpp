@@ -33,8 +33,8 @@ void Server::on(std::string port, std::string password) {
 
 	if ((this->_servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == ERROR)
 		throw std::runtime_error("socket ");
-	// bool option = true;
-	// std::cout << "sockopt " << setsockopt( _servSock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) << std::endl;
+	int option = true;
+	std::cout << "sockopt " << setsockopt( _servSock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) << std::endl;
 	std::cout << "this.servsock fron socket(): " << this->_servSock << std::endl;
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
@@ -155,6 +155,8 @@ void Server::servSend(int fd, std::string &buf_write) {
 			throw std::runtime_error("send message");
 		}
 		buf_write.clear();
+		if (this->_clients[fd]->getIsDead())
+			removeClient(fd);
 	} catch(std::exception &e) {
 		std::cerr << e.what() << std::endl;
 	}
@@ -166,4 +168,15 @@ std::string	Server::getPassword() const {
 
 void Server::removeClient(int fd) {
 	this->_clients.erase(fd);
+	close(fd);
+}
+
+bool Server::isUsedNickname(std::string &nick) {
+	std::map<int, Client *>::iterator ite = this->_clients.end();
+	for (std::map<int, Client *>::iterator it = this->_clients.begin(); it != ite; ++it) {
+		if (it->second->getNickName() == nick) {
+			return true;
+		}
+	}
+	return false;
 }

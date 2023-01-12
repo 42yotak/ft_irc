@@ -1,6 +1,7 @@
 #include "Command.hpp"
 #include "Client.hpp"
 #include "Server.hpp"
+#include "Utils.hpp"
 
 Command::Command() {
 
@@ -20,40 +21,23 @@ void Command::welcomeProtocol(std::vector<std::string> cmds, Client *client) {
 	} else if (cmds[0] == "CAP") {
 		//ignore
 	} else {
-		//:irc.local 451 * KICK :You have not registered.
+		//451 <client> :You have not registered
+		client->setBufWrite("451 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite("  :You have not registered\r\n");
 	}
-
-	if ((client->getIsRegistered() & (NICK | USER)) == (NICK | USER)) {
+	if (client->getIsRegistered() >= (NICK | USER)) {
 		if (client->getIsRegistered() & PASS) {
 			// buf_write에 welcome message 쓰기
-			// 001 :<client> :Welcome to the <networkname> Network, <nick>
+			// <source> 001 :<client> :Welcome to the <networkname> Network, <nick>
 			client->setBufWrite("001 :");
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite(" :Welcome to the PokémonGo Network, ");
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite("\r\n");
-			// 002 :<client> :Your host is <servername>, running version <version>
-			client->setBufWrite("002 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" :Your host is PokémonGo, running version 1.0\r\n");
-			// 003 :<client> :This server was created <datetime>
-			client->setBufWrite("003 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" :This server was created yesterday\r\n");
-			// 004 :<client> <servername> <version> <available user modes> <available channel modes>
-			client->setBufWrite("004 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" PokémonGo 1.0\r\n");
-			// 005 :<client> <1-13 tokens> :are supported by this server
-			client->setBufWrite("005 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" :are supported by this server\r\n");
 		} else {
-			// "<client> :Password incorrect"
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" ");
-			client->setBufWrite(" :Password incorrect\r\n");
-			Server::callServer().removeClient(client->getFd());
+			// ERROR :Closing link: [Access denied by configuration]
+			client->setBufWrite("ERROR :Closing link: [Access denied by configuration]\r\n");
 		}
 	}
 }
@@ -61,11 +45,11 @@ void Command::welcomeProtocol(std::vector<std::string> cmds, Client *client) {
 void Command::cmdPass(std::vector<std::string> cmd, Client *client) {
 	if (cmd.size() < 2) {
 		//"<client> <command> :Not enough parameters"
-		//461 nickname PASS :Not enough parameters
+		//461 :nickname PASS :Not enough parameters
 		client->setBufWrite("461 ");
 		client->setBufWrite(client->getNickName());
-		client->setBufWrite(" PASS");
-		client->setBufWrite(" :Not enough parameters\r\n");
+		client->setBufWrite(" PASS :Not enough parameters\r\n");
+		return ;
 	}
 	if (cmd[1] == Server::callServer().getPassword())
 		client->setIsRegistered(PASS);
@@ -74,9 +58,10 @@ void Command::cmdPass(std::vector<std::string> cmd, Client *client) {
 }
 
 void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
-// yuhwang
 	if (cmd.size() < 2) {
-		client->setBufWrite("461 :Not enough parameters\r\n");
+		client->setBufWrite("461 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" NICK :Not enough parameters\r\n");
 		return;
 	}
 	if (!this->isValidName(cmd[1])) {
@@ -85,25 +70,43 @@ void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite(" ");
 		client->setBufWrite(cmd[1]);
 		client->setBufWrite(" :Erroneus nickname\r\n");
-		return ;
+		return;
+	}
+	if (Server::callServer().isUsedNickname(cmd[1])) {
+		//"433 :<client> <nick> :Nickname is already in use"
+		client->setBufWrite("433 :");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" ");
+		client->setBufWrite(cmd[1]);
+		client->setBufWrite(" :Nickname is already in use\r\n");
+		return;
+	}
+	client->setIsRegistered(NICK);
+	if (client->getIsRegistered() == REGISTER) {
+		client->setBufWrite(":");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" NICK ");
+		client->setBufWrite(cmd[1]);
 	}
 	client->setNickName(cmd[1]);
-	if (client->getIsRegistered() == REGISTER) {
-		
-	}
 }
 
 bool Command::isValidName(const std::string& name) {
 	// https://modern.ircdocs.horse/#clients
-	if (name.find(' ') || name.find(',') || name.find('*') || \
-			name.find('?') || name.find('!') || name.find('@') || \
-			name[0] == '$' || name[0] == ':' || name[0] == '#' || \
-			name[0] == '&' || name.find('.'))
+	if (name.find(' ') != std::string::npos ||
+	name.find(',') != std::string::npos ||
+	name.find('*') != std::string::npos ||
+	name.find('?') != std::string::npos ||
+	name.find('!') != std::string::npos ||
+	name.find('@') != std::string::npos ||
+	name.find('.') != std::string::npos ||
+	name[0] == '$' || name[0] == ':' || name[0] == '#' || name[0] == '&')
 		return false;
 	return true;
 }
 
 void Command::cmdUser(std::vector<std::string> cmd, Client *client) {
+	// yotak1
 	// USER root * 0 :root
 	// USER [username] [nickname] [address] [:realname]
 	if (cmd.size() < 5) {
@@ -125,17 +128,27 @@ void Command::cmdUser(std::vector<std::string> cmd, Client *client) {
 	client->setUserName(cmd[1]);
 	client->setRealName(cmd[4]);
 	client->setIsRegistered(USER);
-	if (client->getIsRegistered() == NOPASS) {
-		client->setBufWrite("ERROR :Closing Link: " + client->getNickName() + \
-			" [Access denied by configuration]\r\n");
-		// client 제거
-	}
 }
-void Command::cmdPing(std::vector<std::string> cmd, Client *client) {
 
+void Command::cmdPing(std::vector<std::string> cmd, Client *client) {
+	if (cmd.size() < 2) {
+		//not enough parameters
+		client->setBufWrite("461 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" PING :Not enough parameters\r\n");
+		return ;
+	}
+	client->setBufWrite(":");
+	client->setBufWrite(SERVER_NAME);
+	client->setBufWrite(" PONG :");
+	client->setBufWrite(cmd[1]);
+	client->setBufWrite("\r\n");
 }
+
 void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 	// QUIT [<message>]
+	// QUIT 후 메시지가 없다면 QUIT :leaving
+	// QUIT 뒤는 무조건 메시지 처리 
 }
 
 void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
