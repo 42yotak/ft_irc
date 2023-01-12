@@ -46,8 +46,7 @@ class Client;
 #define ERR_NOTOPLEVEL 413
 #define ERR_WILDTOPLEVEL 414
 #define RPL_AWAY 301
-
-#define ERR_NOPRIVILEGES 481
+/* NOTICE X */
 
 class Command {
 	public:
