@@ -18,7 +18,6 @@
 #include <cstring>
 
 #define ERROR -1
-#define SERVER_NAME "PokémonGo"
 
 class Client;
 class Channel;

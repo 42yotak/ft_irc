@@ -10,6 +10,8 @@
 #define PURPLE "\e[0;35m"
 #define NC "\e[0;37m"
 
+#define SERVER_NAME "PokémonGo"
+
 class Command;
 class Server;
 

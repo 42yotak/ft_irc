@@ -13,7 +13,10 @@ Client::Client(int fd) {
 	this->_realName = "*";
 }
 
-Client::~Client() {}
+Client::~Client() {
+	//client 삭제할 때 할당된 fd반환
+	close(this->_fd);
+}
 
 std::string &Client::getBufRead() {
 	return this->buf_read;
@@ -41,10 +44,10 @@ const std::string	&Client::getRealName() const {
 	return this->_realName;
 }
 
-void Client::setBufRead(const std::string &msg) {
-	// strlcat(this->buf_read, msg, strlen(this->buf_read));
-	this->buf_read += msg;
-}
+// void Client::setBufRead(const std::string &msg) {
+// 	// strlcat(this->buf_read, msg, strlen(this->buf_read));
+// 	this->buf_read += msg;
+// }
 
 void Client::setBufWrite(const std::string &msg) {
 	// strlcat(this->buf_write, msg, strlen(this->buf_read));
@@ -68,46 +71,37 @@ void	Client::setRealName(const std::string &realName) {
 }
 
 void Client::makeProtocol() {
-	// std::vector<std::string> cmds;
+	std::cout << RED "makeProtocol\n" NC;
+	size_t delimiter;
+	while ((delimiter = std::min(this->buf_read.find('\r'), this->buf_read.find('\n'))) != std::string::npos) {
+		std::string cmd = this->buf_read.substr(0, delimiter);
+		this->buf_read.erase(0, delimiter + 1);
+		if (cmd == "") continue;
 
-	// cmds = split(std::string(this->buf_read), "\r\n");
-	std::vector<std::string> cmds(split(std::string(this->buf_read), "\r\n"));
-	// cmds
-	// CAP LS \r\n
-	// PASS \r\n
-	// USER \r\n
-	// NICK \r\n
-
-	// Join
-	// Join #channel \r\n
-	std::vector<std::string>::iterator it = cmds.begin();
-	std::vector<std::string>::iterator ite = cmds.end();
-	while (it != ite) {
-		std::vector<std::string> cmd = split((*it), " ");
+		std::vector<std::string> tokens = split(cmd, " ");
 		if (getIsRegistered() != (PASS | NICK | USER)) {
-			callCommand()->welcomeProtocol(cmds, this);
-		} else if (cmd[0] == "NICK") {
-			callCommand()->cmdNick(cmds, this);
-		} else if (cmd[0] == "PING") {
-			callCommand()->cmdPing(cmds, this);
-		} else if (cmd[0] == "QUIT") {
-			callCommand()->cmdQuit(cmds, this);
-		} else if (cmd[0] == "JOIN") {
-			callCommand()->cmdJoin(cmds, this);
-		} else if (cmd[0] == "PART") {
-			callCommand()->cmdPart(cmds, this);
-		} else if (cmd[0] == "KICK") {
-			callCommand()->cmdKick(cmds, this);
-		} else if (cmd[0] == "NOTICE") {
-			callCommand()->cmdNotice(cmds, this);
-		} else if (cmd[0] == "PRIVMSG") {
-			callCommand()->cmdPrivmsg(cmds, this);
+			callCommand()->welcomeProtocol(tokens, this);
+		} else if (tokens[0] == "NICK") {
+			callCommand()->cmdNick(tokens, this);
+		} else if (tokens[0] == "PING") {
+			callCommand()->cmdPing(tokens, this);
+		} else if (tokens[0] == "QUIT") {
+			callCommand()->cmdQuit(tokens, this);
+		} else if (tokens[0] == "JOIN") {
+			callCommand()->cmdJoin(tokens, this);
+		} else if (tokens[0] == "PART") {
+			callCommand()->cmdPart(tokens, this);
+		} else if (tokens[0] == "KICK") {
+			callCommand()->cmdKick(tokens, this);
+		} else if (tokens[0] == "NOTICE") {
+			callCommand()->cmdNotice(tokens, this);
+		} else if (tokens[0] == "PRIVMSG") {
+			callCommand()->cmdPrivmsg(tokens, this);
 		} else {
 			std::cout << RED "MSG ERROR" NC << std::endl;
 		}
 		// if not registered!
 		
-		++it;
 	}
 }
 

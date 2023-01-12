@@ -98,15 +98,18 @@ void Server::on(std::string port, std::string password) {
 					}
 				} else {
 					// TODO: read message
+					std::cout << BLUE "Server.cpp 101\n" NC; 
 					Client *client = this->_clients[fd];
 					this->servRecv(fd, client->getBufRead());
 					client->makeProtocol();
+					client->clearBufRead();
 				}
 			}
 			if (FD_ISSET(fd, &cpWriteFds)) {
 				// std::cout << "write!!" << std::endl;
 				Client *client = this->_clients[fd];
 				this->servSend(fd, client->getBufWrite());
+				client->clearBufWrite();
 			}
 		}
 	}
@@ -141,10 +144,9 @@ void Server::servRecv(int fd, std::string &buf_read) {
 		std::cerr << e.what() << std::endl;
 	}
 	buf[nbytes] = '\0';
-	// std::string recvMsg(buf);
-	// std::cout << PURPLE << recvMsg << NC << std::endl;
+
 	buf_read += std::string(buf);
-	std::cout << PURPLE << buf << NC;
+	std::cout << PURPLE << std::string(buf) << NC;
 }
 
 void Server::servSend(int fd, std::string &buf_write) {
