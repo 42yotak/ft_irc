@@ -22,36 +22,20 @@ void Command::welcomeProtocol(std::vector<std::string> cmds, Client *client) {
 	} else {
 		//:irc.local 451 * KICK :You have not registered.
 	}
-
-	if ((client->getIsRegistered() & (NICK | USER)) == (NICK | USER)) {
+	std::cout << "Resister\t" << client->getIsRegistered() << std::endl;
+	if (client->getIsRegistered() == REGISTER) {
 		if (client->getIsRegistered() & PASS) {
 			// buf_write에 welcome message 쓰기
-			// 001 :<client> :Welcome to the <networkname> Network, <nick>
+			// <source> 001 :<client> :Welcome to the <networkname> Network, <nick>
 			client->setBufWrite("001 :");
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite(" :Welcome to the PokémonGo Network, ");
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite("\r\n");
-			// 002 :<client> :Your host is <servername>, running version <version>
-			client->setBufWrite("002 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" :Your host is PokémonGo, running version 1.0\r\n");
-			// 003 :<client> :This server was created <datetime>
-			client->setBufWrite("003 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" :This server was created yesterday\r\n");
-			// 004 :<client> <servername> <version> <available user modes> <available channel modes>
-			client->setBufWrite("004 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" PokémonGo 1.0\r\n");
-			// 005 :<client> <1-13 tokens> :are supported by this server
-			client->setBufWrite("005 :");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" :are supported by this server\r\n");
 		} else {
 			// "<client> :Password incorrect"
+			client->setBufWrite("464 :");
 			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" ");
 			client->setBufWrite(" :Password incorrect\r\n");
 			Server::callServer().removeClient(client->getFd());
 		}
@@ -61,11 +45,10 @@ void Command::welcomeProtocol(std::vector<std::string> cmds, Client *client) {
 void Command::cmdPass(std::vector<std::string> cmd, Client *client) {
 	if (cmd.size() < 2) {
 		//"<client> <command> :Not enough parameters"
-		//461 nickname PASS :Not enough parameters
-		client->setBufWrite("461 ");
+		//461 :nickname PASS :Not enough parameters
+		client->setBufWrite("461 :");
 		client->setBufWrite(client->getNickName());
-		client->setBufWrite(" PASS");
-		client->setBufWrite(" :Not enough parameters\r\n");
+		client->setBufWrite(" PASS :Not enough parameters\r\n");
 	}
 	if (cmd[1] == Server::callServer().getPassword())
 		client->setIsRegistered(PASS);
@@ -87,6 +70,7 @@ void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite(" :Erroneus nickname\r\n");
 		return ;
 	}
+	client->setIsRegistered(NICK);
 	client->setNickName(cmd[1]);
 	if (client->getIsRegistered() == REGISTER) {
 		
@@ -95,10 +79,14 @@ void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
 
 bool Command::isValidName(const std::string& name) {
 	// https://modern.ircdocs.horse/#clients
-	if (name.find(' ') || name.find(',') || name.find('*') || \
-			name.find('?') || name.find('!') || name.find('@') || \
-			name[0] == '$' || name[0] == ':' || name[0] == '#' || \
-			name[0] == '&' || name.find('.'))
+	if (name.find(' ') != std::string::npos ||
+	name.find(',') != std::string::npos ||
+	name.find('*') != std::string::npos ||
+	name.find('?') != std::string::npos ||
+	name.find('!') != std::string::npos ||
+	name.find('@') != std::string::npos ||
+	name.find('.') != std::string::npos ||
+	name[0] == '$' || name[0] == ':' || name[0] == '#' || name[0] == '&')
 		return false;
 	return true;
 }

@@ -33,8 +33,8 @@ void Server::on(std::string port, std::string password) {
 
 	if ((this->_servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == ERROR)
 		throw std::runtime_error("socket ");
-	// bool option = true;
-	// std::cout << "sockopt " << setsockopt( _servSock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) << std::endl;
+	int option = true;
+	std::cout << "sockopt " << setsockopt( _servSock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option) ) << std::endl;
 	std::cout << "this.servsock fron socket(): " << this->_servSock << std::endl;
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
