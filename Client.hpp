@@ -27,6 +27,8 @@ class Client {
 		std::string												_realName;
 		std::map<std::string, Channel *>	_channels;
 
+		bool															_isDead;
+
 	public:
 		Client(int fd);
 		~Client();
@@ -35,6 +37,7 @@ class Client {
 		std::string 			&getBufWrite();
 		int								getIsRegistered() const;
 		int								getFd() const;
+		bool							getIsDead() const;
 		const std::string	&getNickName() const;
 		const std::string	&getUserName() const;
 		const std::string	&getRealName() const;
@@ -45,6 +48,7 @@ class Client {
 		void	setNickName(const std::string &nickName);
 		void	setUserName(const std::string &userName);
 		void	setRealName(const std::string &realName);
+		void	setIsDead();
 
 		void	makeProtocol();
 

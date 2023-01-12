@@ -155,6 +155,8 @@ void Server::servSend(int fd, std::string &buf_write) {
 			throw std::runtime_error("send message");
 		}
 		buf_write.clear();
+		if (this->_clients[fd]->getIsDead())
+			removeClient(fd);
 	} catch(std::exception &e) {
 		std::cerr << e.what() << std::endl;
 	}
@@ -166,4 +168,15 @@ std::string	Server::getPassword() const {
 
 void Server::removeClient(int fd) {
 	this->_clients.erase(fd);
+	close(fd);
+}
+
+bool Server::isUsedNickname(std::string &nick) {
+	std::map<int, Client *>::iterator ite = this->_clients.end();
+	for (std::map<int, Client *>::iterator it = this->_clients.begin(); it != ite; ++it) {
+		if (it->second->getNickName() == nick) {
+			return true;
+		}
+	}
+	return false;
 }

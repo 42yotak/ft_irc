@@ -56,4 +56,6 @@ class Server {
 		std::string	getPassword() const;
 
 		void removeClient(int fd);
+
+		bool isUsedNickname(std::string &nick);
 };
