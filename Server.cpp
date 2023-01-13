@@ -65,6 +65,7 @@ void Server::on(std::string port, std::string password) {
 			if ((selectFds = select(maxFd + 1, &cpReadFds, NULL, NULL, &timeout)) == ERROR)
 				throw std::runtime_error("select ");
 		} catch(std::exception &e) {
+			std::cerr << "errno: " << errno << std::endl;
 			std::cerr << e.what() << std::endl;
 		}
 		std::cout << "selectFds: " << selectFds << std::endl;
@@ -85,6 +86,7 @@ void Server::on(std::string port, std::string password) {
 						if (clientFd < 0) {
 							throw std::runtime_error("accept ");
 						}
+						std::cout << "clientfd: " << clientFd << std::endl;
 						FD_SET(clientFd, &this->_readFds);
 						FD_SET(clientFd, &this->_writeFds);
 
@@ -98,20 +100,23 @@ void Server::on(std::string port, std::string password) {
 					}
 				} else {
 					// TODO: read message
-					std::cout << BLUE "Server.cpp 101\n" NC;
 					Client *client = this->_clients[fd];
 					this->servRecv(fd, client->getBufRead());
-					client->makeProtocol();
-					client->clearBufRead();
+					if (_clients.find(fd) != _clients.end()) {
+						client->makeProtocol();
+						client->clearBufRead();
+					}
 				}
 			}
 			if (FD_ISSET(fd, &cpWriteFds)) {
 				// std::cout << "write!!" << std::endl;
-				Client *client = this->_clients[fd];
-				this->servSend(fd, client->getBufWrite());
-				client->clearBufWrite();
-				if (client->getIsDead())
-					removeClient(fd);
+				std::map<int, Client*>::iterator clnt = this->_clients.find(fd);
+				if (clnt != this->_clients.end()) {
+					this->servSend(fd, clnt->second->getBufWrite());
+					clnt->second->clearBufWrite();
+					if (clnt->second->getIsDead())
+						removeClient(fd);
+				}
 			}
 		}
 	}
@@ -140,7 +145,8 @@ void Server::servRecv(int fd, std::string &buf_read) {
 		if (nbytes == 0) {
 			FD_CLR(fd, &this->_readFds);
 			FD_CLR(fd, &this->_writeFds);
-			close(fd);
+			this->removeClient(fd);
+			return;
 		}
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
@@ -176,9 +182,12 @@ Channel* Server::getChannel(std::string &name) {
 
 void Server::removeClient(int fd) {
 	std::map<int, Client *>::iterator it = this->_clients.find(fd);
-	delete (*it).second;
-	this->_clients.erase(it);
-	close(fd);
+	if (it != this->_clients.end()) {
+		delete (*it).second;
+		this->_clients.erase(it);
+		close(fd);
+	}
+	std::cout << RED "remove client end" NC << std::endl;
 }
 
 bool Server::isUsedNickname(std::string &nick) {

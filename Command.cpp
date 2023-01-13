@@ -224,7 +224,7 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 	NUMERIC 461 403 442
 	*/
 	//:irc.local 403 yotak <channelname> :No such channel
-	
+
 	// 내가 없는 채널에서 나가려고 하는경우 442
 	// 127.000.000.001.60774-127.000.000.001.06664: PART #42cluster
 	// 127.000.000.001.06664-127.000.000.001.60774: :irc.local 442 jerry #42cluster :You're not on that channel

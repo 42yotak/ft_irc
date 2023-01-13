@@ -82,7 +82,6 @@ void Client::setIsDead() {
 }
 
 void Client::makeProtocol() {
-	std::cout << RED "makeProtocol\n" NC;
 	size_t delimiter;
 	while ((delimiter = std::min(this->buf_read.find('\r'), this->buf_read.find('\n'))) != std::string::npos) {
 		std::string cmd = this->buf_read.substr(0, delimiter);
@@ -109,7 +108,7 @@ void Client::makeProtocol() {
 		} else if (tokens[0] == "PRIVMSG") {
 			callCommand()->cmdPrivmsg(tokens, this);
 		} else {
-			std::cout << RED "MSG ERROR" NC << std::endl;
+			std::cout << RED "NOT CORRECT COMMAND" NC << std::endl;
 		}
 		// if not registered!
 		
