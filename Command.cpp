@@ -31,7 +31,7 @@ void Command::welcomeProtocol(std::vector<std::string> cmds, Client *client) {
 		if (client->getIsRegistered() & PASS) {
 			// buf_write에 welcome message 쓰기
 			// <source> 001 :<client> :Welcome to the <networkname> Network, <nick>
-			client->setBufWrite("001 :");
+			client->setBufWrite("001 ");
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite(" :Welcome to the PokémonGo Network, ");
 			client->setBufWrite(client->getNickName());
@@ -66,7 +66,7 @@ void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
 		return;
 	}
 	if (!this->isValidName(cmd[1])) {
-		client->setBufWrite("432 :");
+		client->setBufWrite("432 ");
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" ");
 		client->setBufWrite(cmd[1]);
@@ -75,7 +75,7 @@ void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
 	}
 	if (Server::callServer().isUsedNickname(cmd[1])) {
 		//"433 :<client> <nick> :Nickname is already in use"
-		client->setBufWrite("433 :");
+		client->setBufWrite("433 ");
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" ");
 		client->setBufWrite(cmd[1]);
@@ -88,6 +88,7 @@ void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" NICK ");
 		client->setBufWrite(cmd[1]);
+		client->setBufWrite("\r\n");
 	}
 	client->setNickName(cmd[1]);
 }
@@ -195,7 +196,7 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 
 		// client한테 출력
 			// 353 :<client> <symbol> <channel> :[prefix]<nick>{ [prefix]<nick>}
-		client->setBufWrite("353 :");
+		client->setBufWrite("353 ");
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" = ");
 		client->setBufWrite(*it);
@@ -210,8 +211,9 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite("\r\n");
 
 		// 366 :<client> <channel> :End of /NAMES list
-		client->setBufWrite("366 :");
+		client->setBufWrite("366 ");
 		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" ");
 		client->setBufWrite(*it);
 		client->setBufWrite(" :End of /NAMES list\r\n");	
 	}
