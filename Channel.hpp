@@ -14,4 +14,10 @@ class Channel {
 		Channel();
 		Channel(std::string name);
 		~Channel();
+
+		std::string& getChannelName();
+		std::map<int, Client *>& getClients();
+
+		void broadcast(const std::string& msg);
+		void addClient(int fd, Client* client);
 };

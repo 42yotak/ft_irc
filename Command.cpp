@@ -2,6 +2,7 @@
 #include "Client.hpp"
 #include "Server.hpp"
 #include "Utils.hpp"
+#include "Channel.hpp"
 
 Command::Command() {
 
@@ -149,15 +150,97 @@ void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 	// QUIT [<message>]
 	// QUIT 후 메시지가 없다면 QUIT :leaving
 	// QUIT 뒤는 무조건 메시지 처리 
+	/* 
+	* 127.000.000.001.54630-127.000.000.001.06667: QUIT :#42seoul
+	* 127.000.000.001.06667-127.000.000.001.54630: ERROR :Closing link: (root@127.0.0.1) [Quit: #42seoul]
+	*/
+	if (cmd.size() == 1) {
+		cmd.push_back(std::string("Client exited"));
+	}
+	client->setIsDead();
+	client->setBufWrite("Error :");
+	client->setBufWrite("Closing link: ");
+	client->setBufWrite("(" + client->getNickName() + ")");
+	client->setBufWrite("[Quit: " + cmd[1] + "]\r\n");
+	// broadcasting 127.000.000.001.06664-127.000.000.001.38276: :quit_ted!root@127.0.0.1 QUIT :Quit: leaving
+	std::map<std::string, Channel *>::iterator it = client->getChannels().begin();
+	std::map<std::string, Channel *>::iterator ite = client->getChannels().end();
+	std::string broadcastMsg(":" + client->getNickName() + " QUIT :Quit: " + cmd[1]);
+	while (it != ite) {
+		(*it).second->broadcast(broadcastMsg);
+		++it;
+	}
 }
 
 void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
-	// 공백으로 split
-	// comma로 split
-	// comma로 split한 각각을 channel로
-}
-void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
+	/* 
+	NUMERIC JOIN 461 403 353 366
+	EXAMPLE :<UserJID> JOIN :<ChannelName>
+	*/
+	std::vector<std::string> channels = split(cmd[1], ",");
+	std::vector<std::string>::iterator it;
+	
+	for (it = channels.begin(); it != channels.end(); it++) {
+		Channel* chan = Server::callServer().getChannel(*it);
+		// channel에 client 추가
+		chan->addClient(client->getFd(), client);
+		client->addChannel(*it, chan);
 
+		// channel에 있는 모든 client한테 joined msg 출력
+		chan->broadcast(":");
+		chan->broadcast(client->getNickName());
+		chan->broadcast(" JOIN :");
+		chan->broadcast(*it);
+		chan->broadcast("\r\n");
+
+		// client한테 출력
+			// 353 :<client> <symbol> <channel> :[prefix]<nick>{ [prefix]<nick>}
+		client->setBufWrite("353 :");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" = ");
+		client->setBufWrite(*it);
+		client->setBufWrite(" :@");
+		std::map<int, Client *>::iterator tmp = chan->getClients().begin();
+		client->setBufWrite(tmp->second->getNickName());
+		tmp++;
+		for(; tmp != chan->getClients().end(); tmp++) {
+			client->setBufWrite(" ");
+			client->setBufWrite(tmp->second->getNickName());
+		}
+		client->setBufWrite("\r\n");
+
+		// 366 :<client> <channel> :End of /NAMES list
+		client->setBufWrite("366 :");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(*it);
+		client->setBufWrite(" :End of /NAMES list\r\n");	
+	}
+}
+
+void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
+	/*
+	NUMERIC 461 403 442
+	*/
+	//:irc.local 403 yotak <channelname> :No such channel
+	
+	// 내가 없는 채널에서 나가려고 하는경우 442
+	// 127.000.000.001.60774-127.000.000.001.06664: PART #42cluster
+	// 127.000.000.001.06664-127.000.000.001.60774: :irc.local 442 jerry #42cluster :You're not on that channel
+
+	// 127.000.000.001.44682-127.000.000.001.06664: PART #gun,#gon
+	// 127.000.000.001.06664-127.000.000.001.44682: :yotak!root@127.0.0.1 PART :#gun
+	// :yotak!root@127.0.0.1 PART :#gon
+
+	// 127.000.000.001.44682-127.000.000.001.06664: PART #gun,#gon
+
+	// /part #gam, #lee
+	// 127.000.000.001.44682-127.000.000.001.06664: PART #gam, :#lee
+
+	// 127.000.000.001.06664-127.000.000.001.44682: :yotak!root@127.0.0.1 PART #gam :#lee
+
+	// 127.000.000.001.06664-127.000.000.001.60770: :yotak!root@127.0.0.1 PART #hellocluster :hellocluster bye
+
+	//broadcast 메시지와 나에게 보내는 메시지가 같다!
 }
 void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 	// KICK <channel> <nicks> [<reason>]

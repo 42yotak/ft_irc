@@ -33,16 +33,16 @@ class Client {
 		Client(int fd);
 		~Client();
 
-		std::string 			&getBufRead();
-		std::string 			&getBufWrite();
-		int								getIsRegistered() const;
-		int								getFd() const;
-		bool							getIsDead() const;
-		const std::string	&getNickName() const;
-		const std::string	&getUserName() const;
-		const std::string	&getRealName() const;
+		std::string 											&getBufRead();
+		std::string 											&getBufWrite();
+		std::map<std::string, Channel *>	&getChannels();
+		int																getIsRegistered() const;
+		int																getFd() const;
+		bool															getIsDead() const;
+		const std::string									&getNickName() const;
+		const std::string									&getUserName() const;
+		const std::string									&getRealName() const;
 
-		// void	setBufRead(const std::string &msg);
 		void	setBufWrite(const std::string &msg);
 		void	setIsRegistered(int cmd);
 		void	setNickName(const std::string &nickName);
@@ -51,6 +51,8 @@ class Client {
 		void	setIsDead();
 
 		void	makeProtocol();
+
+		void 	addChannel(const std::string& name, Channel* channel);
 
 		// useless?
 		void clearBufRead();

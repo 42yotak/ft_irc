@@ -55,6 +55,8 @@ class Server {
 
 		std::string	getPassword() const;
 
+		Channel* getChannel(std::string &name);
+
 		void removeClient(int fd);
 
 		bool isUsedNickname(std::string &nick);

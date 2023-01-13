@@ -110,6 +110,8 @@ void Server::on(std::string port, std::string password) {
 				Client *client = this->_clients[fd];
 				this->servSend(fd, client->getBufWrite());
 				client->clearBufWrite();
+				if (client->getIsDead())
+					removeClient(fd);
 			}
 		}
 	}
@@ -155,8 +157,6 @@ void Server::servSend(int fd, std::string &buf_write) {
 			throw std::runtime_error("send message");
 		}
 		buf_write.clear();
-		if (this->_clients[fd]->getIsDead())
-			removeClient(fd);
 	} catch(std::exception &e) {
 		std::cerr << e.what() << std::endl;
 	}
@@ -166,8 +166,18 @@ std::string	Server::getPassword() const {
 	return this->_password;
 }
 
+Channel* Server::getChannel(std::string &name) {
+	std::map<std::string, Channel*>::iterator it = this->_channels.find(name);
+	if (it != this->_channels.end()) {
+		return (*it).second;
+	}
+	return this->_channels.insert(std::make_pair(name, new Channel(name))).first->second;
+}
+
 void Server::removeClient(int fd) {
-	this->_clients.erase(fd);
+	std::map<int, Client *>::iterator it = this->_clients.find(fd);
+	delete (*it).second;
+	this->_clients.erase(it);
 	close(fd);
 }
 

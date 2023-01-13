@@ -19,7 +19,7 @@ Client::Client(int fd) {
 
 Client::~Client() {
 	//client 삭제할 때 할당된 fd반환
-	close(this->_fd);
+	this->_isDead = true;
 }
 
 std::string &Client::getBufRead() {
@@ -52,10 +52,9 @@ bool Client::getIsDead() const {
 	return this->_isDead;
 }
 
-// void Client::setBufRead(const std::string &msg) {
-// 	// strlcat(this->buf_read, msg, strlen(this->buf_read));
-// 	this->buf_read += msg;
-// }
+std::map<std::string, Channel *>&	Client::getChannels() {
+	return this->_channels;
+}
 
 void Client::setBufWrite(const std::string &msg) {
 	// strlcat(this->buf_write, msg, strlen(this->buf_read));
@@ -115,6 +114,10 @@ void Client::makeProtocol() {
 		// if not registered!
 		
 	}
+}
+
+void 	Client::addChannel(const std::string& name, Channel* channel) {
+	this->_channels.insert(std::make_pair(name, channel));
 }
 
 void Client::clearBufRead() {
