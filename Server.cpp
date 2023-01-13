@@ -98,7 +98,7 @@ void Server::on(std::string port, std::string password) {
 					}
 				} else {
 					// TODO: read message
-					std::cout << BLUE "Server.cpp 101\n" NC; 
+					std::cout << BLUE "Server.cpp 101\n" NC;
 					Client *client = this->_clients[fd];
 					this->servRecv(fd, client->getBufRead());
 					client->makeProtocol();
