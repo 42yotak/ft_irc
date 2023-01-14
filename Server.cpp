@@ -138,7 +138,8 @@ void Server::servRecv(int fd, std::string &buf_read) {
 	try {
 		nbytes = recv(fd, (void *)buf, 512, MSG_DONTWAIT);
 		std::cout << "nbytes: " << nbytes << std::endl;
-		if (nbytes > 510 || nbytes == ERROR) {
+			//FIXME: EAGAIN
+		if (nbytes > 510 || (nbytes == ERROR && errno != EAGAIN)) {
 			throw(std::runtime_error("recv message "));
 		}
 		// close request
@@ -150,6 +151,12 @@ void Server::servRecv(int fd, std::string &buf_read) {
 		}
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
+
+			//FIXME: xxx
+			FD_CLR(fd, &this->_readFds);
+			FD_CLR(fd, &this->_writeFds);
+			this->removeClient(fd);
+			return;
 	}
 	buf[nbytes] = '\0';
 
@@ -159,12 +166,18 @@ void Server::servRecv(int fd, std::string &buf_read) {
 
 void Server::servSend(int fd, std::string &buf_write) {
 	try {
-		if (send(fd, buf_write.c_str(), buf_write.length(), 0)) {
+		if (send(fd, buf_write.c_str(), buf_write.length(), 0) == ERROR) {
 			throw std::runtime_error("send message");
 		}
 		buf_write.clear();
 	} catch(std::exception &e) {
 		std::cerr << e.what() << std::endl;
+
+			//FIXME: xxx
+			FD_CLR(fd, &this->_readFds);
+			FD_CLR(fd, &this->_writeFds);
+			this->removeClient(fd);
+			return;
 	}
 }
 
