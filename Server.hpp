@@ -10,7 +10,8 @@
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
-
+ #include <fcntl.h>
+ 
 #include <iostream>
 #include <exception>
 

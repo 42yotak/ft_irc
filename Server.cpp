@@ -83,6 +83,7 @@ void Server::on(std::string port, std::string password) {
 
 					try {
 						clientFd = accept(fd, (struct sockaddr *)&clientAdr, (socklen_t *)&clientLen);
+						fcntl(clientFd, F_SETFL, O_NONBLOCK);
 						if (clientFd < 0) {
 							throw std::runtime_error("accept ");
 						}
