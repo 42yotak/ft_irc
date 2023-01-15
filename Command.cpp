@@ -334,6 +334,7 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 			chan->broadcast(" :");
 			chan->broadcast(*it);
 		} else {
+			chan->broadcast(" ");
 			chan->broadcast(*it);
 			chan->broadcast(" :");
 			chan->broadcast(cmd[3]);
@@ -388,7 +389,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			chanIt->second->broadcast(" PRIVMSG ");
 			chanIt->second->broadcast(*target);
 			chanIt->second->broadcast(" :");
-			chanIt->second->broadcast(cmd[3]);
+			chanIt->second->broadcast(cmd[2]);
 			chanIt->second->broadcast("\r\n");
 		} else {
 			// user
@@ -407,7 +408,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			client->setBufWrite(" PRIVMSG ");
 			client->setBufWrite(*target);
 			client->setBufWrite(" :");
-			client->setBufWrite(cmd[3]);
+			client->setBufWrite(cmd[2]);
 			client->setBufWrite("\r\n");
 			Client* receiver = Server::callServer().getClient(*target);
 			receiver->setBufWrite(":");
@@ -415,12 +416,78 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			receiver->setBufWrite(" PRIVMSG ");
 			receiver->setBufWrite(*target);
 			receiver->setBufWrite(" :");
-			receiver->setBufWrite(cmd[3]);
+			receiver->setBufWrite(cmd[2]);
 			receiver->setBufWrite("\r\n");
 		} 
 	}
 }
 
 void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
-	
+	if (cmd.size() < 3) {
+		client->setBufWrite("461 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" PRIVMSG :Not enough parameters\r\n");
+		return ;
+	}
+	std::vector<std::string> targets = split(cmd[1], ",");
+
+	std::vector<std::string>::iterator ite = targets.end();
+	for (std::vector<std::string>::iterator target = targets.begin(); target != ite; target++) {
+		if ((*target)[0] == '#') {
+			// channel
+			//401 yotak #4242cluster2 :No such nick/channel
+			if (!Server::callServer().isExistChannel(*target)) {
+				client->setBufWrite("401 ");
+				client->setBufWrite(client->getNickName());
+				client->setBufWrite(" ");
+				client->setBufWrite(*target);
+				client->setBufWrite(" :No such channel\r\n");
+				continue;
+			}
+			std::map<std::string, Channel *>::iterator chanIt = client->getChannels().find(*target);
+			// 404 user2 #42seoul :You askjhflasdkjgh
+			if (chanIt == client->getChannels().end()) {
+				client->setBufWrite("404 ");
+				client->setBufWrite(client->getNickName());
+				client->setBufWrite(" ");
+				client->setBufWrite(*target);
+				client->setBufWrite(" :You cannot send external messages to this channel\r\n");
+				continue;
+			}
+			chanIt->second->broadcast(":");
+			chanIt->second->broadcast(client->getNickName());
+			chanIt->second->broadcast(" NOTICE ");
+			chanIt->second->broadcast(*target);
+			chanIt->second->broadcast(" :");
+			chanIt->second->broadcast(cmd[2]);
+			chanIt->second->broadcast("\r\n");
+		} else {
+			// user
+			//401 yotak #4242cluster2 :No such nick/channel
+			if (!Server::callServer().isUsedNickname(*target)) {
+				client->setBufWrite("401 ");
+				client->setBufWrite(client->getNickName());
+				client->setBufWrite(" ");
+				client->setBufWrite(*target);
+				client->setBufWrite(" :No such nick\r\n");
+				continue;
+			}
+			//:yujerry PRIVMSG yotak :bye
+			client->setBufWrite(":");
+			client->setBufWrite(client->getNickName());
+			client->setBufWrite(" NOTICE ");
+			client->setBufWrite(*target);
+			client->setBufWrite(" :");
+			client->setBufWrite(cmd[2]);
+			client->setBufWrite("\r\n");
+			Client* receiver = Server::callServer().getClient(*target);
+			receiver->setBufWrite(":");
+			receiver->setBufWrite(client->getNickName());
+			receiver->setBufWrite(" NOTICE ");
+			receiver->setBufWrite(*target);
+			receiver->setBufWrite(" :");
+			receiver->setBufWrite(cmd[2]);
+			receiver->setBufWrite("\r\n");
+		} 
+	}
 }
