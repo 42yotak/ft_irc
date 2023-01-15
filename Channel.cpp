@@ -27,3 +27,7 @@ void Channel::broadcast(const std::string &msg) {
 void Channel::addClient(int fd, Client* client) {
 	this->_clients.insert(std::make_pair(fd, client));
 }
+
+void Channel::removeClient(const std::string& nick) {
+
+}

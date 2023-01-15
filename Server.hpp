@@ -59,5 +59,6 @@ class Server {
 
 		void removeClient(int fd);
 
-		bool isUsedNickname(std::string &nick);
+		bool isUsedNickname(const std::string &nick);
+		bool isExistChannel(const std::string &name);
 };
