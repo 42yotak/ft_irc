@@ -114,17 +114,24 @@ void Command::cmdUser(std::vector<std::string> cmd, Client *client) {
 	if (cmd.size() < 5) {
 		// <command> :<reason>
 		// :irc.local 461 * USER :Not enough parameters
-		client->setBufWrite("461 :Not enough parameters\r\n");
+		client->setBufWrite("461 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" USER :Not enough parameters\r\n");
+		return ;
 		return ;
 	}
 	if (client->getIsRegistered() & USER) {
 		// :irc.local 462 * :You may not reregister
-		client->setBufWrite("462 :You may not reregister\r\n");
+		client->setBufWrite("462 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" :You may not reregister\r\n");
 		return ;
 	}
 	if (!isValidName(cmd[1])) {
 		// :irc.local 468 * USER :Your username is not valid'
-		client->setBufWrite("468 :Your username is not valid\r\n");
+		client->setBufWrite("468 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" USER :Your username is not valid\r\n");
 		return ;
 	}
 	client->setUserName(cmd[1]);
@@ -223,26 +230,52 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 	/*
 	NUMERIC 461 403 442
 	*/
-	//:irc.local 403 yotak <channelname> :No such channel
-
-	// 내가 없는 채널에서 나가려고 하는경우 442
-	// 127.000.000.001.60774-127.000.000.001.06664: PART #42cluster
-	// 127.000.000.001.06664-127.000.000.001.60774: :irc.local 442 jerry #42cluster :You're not on that channel
-
-	// 127.000.000.001.44682-127.000.000.001.06664: PART #gun,#gon
-	// 127.000.000.001.06664-127.000.000.001.44682: :yotak!root@127.0.0.1 PART :#gun
-	// :yotak!root@127.0.0.1 PART :#gon
-
-	// 127.000.000.001.44682-127.000.000.001.06664: PART #gun,#gon
-
-	// /part #gam, #lee
-	// 127.000.000.001.44682-127.000.000.001.06664: PART #gam, :#lee
-
-	// 127.000.000.001.06664-127.000.000.001.44682: :yotak!root@127.0.0.1 PART #gam :#lee
-
-	// 127.000.000.001.06664-127.000.000.001.60770: :yotak!root@127.0.0.1 PART #hellocluster :hellocluster bye
-
-	//broadcast 메시지와 나에게 보내는 메시지가 같다!
+	// 461
+	if (cmd.size() < 2) {
+		client->setBufWrite("461 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" PART :Not enough parameters\r\n");
+		return ;
+	}
+	// 403 yotak <channelname> :No such channel
+	std::vector<std::string> channels = split(cmd[1], ",");
+	std::vector<std::string>::iterator it;
+	
+	for (it = channels.begin(); it != channels.end(); it++) {
+		if (Server::callServer().isExistChannel(*it)) {
+			if (client->getChannels().find(*it) == client->getChannels().end()) {
+				// can't find
+				// 442 jerry #42cluster :You're not on that channel
+					client->setBufWrite("442 ");
+					client->setBufWrite(client->getNickName());
+					client->setBufWrite(" ");
+					client->setBufWrite(*it);
+					client->setBufWrite(" :You're not on that channel\r\n");
+			} else {
+				// set message
+				// :yotak PART :#gun
+				// :yotak PART #gun :bye
+				client->setBufWrite(":");
+				client->setBufWrite(client->getNickName());
+				client->setBufWrite(" PART ");
+				if (cmd.size() == 2) {
+					client->setBufWrite(" :");
+					client->setBufWrite((*it));
+				} else {
+					client->setBufWrite((*it));
+					client->setBufWrite(" :");
+					client->setBufWrite(cmd[2]);
+				}
+				client->setBufWrite("\r\n");
+			}
+		} else {
+			client->setBufWrite("403 ");
+			client->setBufWrite(client->getNickName());
+			client->setBufWrite(" ");
+			client->setBufWrite((*it));
+			client->setBufWrite(" :No such channel\r\n");
+		}
+	}
 }
 void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 	// KICK <channel> <nicks> [<reason>]

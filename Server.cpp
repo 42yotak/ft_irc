@@ -203,10 +203,20 @@ void Server::removeClient(int fd) {
 	std::cout << RED "remove client end" NC << std::endl;
 }
 
-bool Server::isUsedNickname(std::string &nick) {
+bool Server::isUsedNickname(const std::string &nick) {
 	std::map<int, Client *>::iterator ite = this->_clients.end();
 	for (std::map<int, Client *>::iterator it = this->_clients.begin(); it != ite; ++it) {
 		if (it->second->getNickName() == nick) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Server::isExistChannel(const std::string &name) {
+	std::map<std::string, Channel *>::iterator ite = this->_channels.end();
+	for (std::map<std::string, Channel *>::iterator it = this->_channels.begin(); it != ite; ++it) {
+		if (it->first == name) {
 			return true;
 		}
 	}
