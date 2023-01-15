@@ -28,6 +28,16 @@ void Channel::addClient(int fd, Client* client) {
 	this->_clients.insert(std::make_pair(fd, client));
 }
 
-void Channel::removeClient(const std::string& nick) {
+void Channel::removeClient(int fd) {
+	this->_clients.erase(fd);
+}
 
+Client* Channel::searchNickname(const std::string& nick) {
+	std::map<int, Client *>::iterator ite = this->_clients.end();
+	for (std::map<int, Client *>::iterator it = this->_clients.begin(); it != ite; it++) {
+		if (it->second->getNickName() == nick) {
+			return it->second;
+		}
+	}
+	return NULL;
 }

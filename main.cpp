@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include "Utils.hpp"
+// sudo tcpflow -i lo0 -c -p port 6667
 
 int main(int argc, char *argv[]) {
 	if (argc != 3) {

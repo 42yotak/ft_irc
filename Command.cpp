@@ -255,18 +255,22 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 				// set message
 				// :yotak PART :#gun
 				// :yotak PART #gun :bye
-				client->setBufWrite(":");
-				client->setBufWrite(client->getNickName());
-				client->setBufWrite(" PART ");
+				Channel *chan = client->getChannels().find(*it)->second;
+				chan->broadcast(":");
+				chan->broadcast(client->getNickName());
+				chan->broadcast(" PART ");
 				if (cmd.size() == 2) {
-					client->setBufWrite(" :");
-					client->setBufWrite((*it));
+					chan->broadcast(" :");
+					chan->broadcast((*it));
 				} else {
-					client->setBufWrite((*it));
-					client->setBufWrite(" :");
-					client->setBufWrite(cmd[2]);
+					chan->broadcast((*it));
+					chan->broadcast(" :");
+					chan->broadcast(cmd[2]);
 				}
-				client->setBufWrite("\r\n");
+				chan->broadcast("\r\n");
+				
+				chan->removeClient(client->getFd());
+				client->removeChannel(chan->getChannelName());
 			}
 		} else {
 			client->setBufWrite("403 ");
@@ -277,20 +281,74 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 		}
 	}
 }
+
 void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
-	// KICK <channel> <nicks> [<reason>]
-	// ' ' split
-	// if (cmd < 2) -> error
-	// cmd[0] -> "channel"
-	// cmd[1] -> ',' split
-	// while(cmd[1][i]) -> "nickname"
-	// if(cmd[2])
-	// 	while(cmd[i]) -> "reason comment"
+	if (cmd.size() < 3) {
+		client->setBufWrite("461 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" KICK :Not enough parameters\r\n");
+		return ;
+	}
+	
+	if (!Server::callServer().isExistChannel(cmd[1])) {
+			client->setBufWrite("403 ");
+			client->setBufWrite(client->getNickName());
+			client->setBufWrite(" ");
+			client->setBufWrite(cmd[1]);
+			client->setBufWrite(" :No such channel\r\n");
+		return;
+	}
+
+	Channel*									chan = Server::callServer().getChannel(cmd[1]);
+	if (!(client->getNickName() == chan->getClients().begin()->second->getNickName())) {
+		// 482(<client> <channel> :You're not channel operator) 
+		// :irc.atw-inter.net 482 yuje #4242 :You're not channel operator
+		client->setBufWrite("482 ");
+		client->setBufWrite(client->getNickName());
+		client->setBufWrite(" ");
+		client->setBufWrite(cmd[1]);
+		client->setBufWrite(" :You're not channel operator\r\n");
+		return ;
+	}
+
+	std::vector<std::string>	users = split(cmd[2], ",");
+	std::vector<std::string>::iterator it;
+	for (it = users.begin(); it != users.end(); it++) {
+		Client* banned = chan->searchNickname(*it);
+		if (!banned) {
+			// 441(<client> <nick> <channel> :They aren't on that channel)
+			client->setBufWrite("441 ");
+			client->setBufWrite(client->getNickName());
+			client->setBufWrite(" ");
+			client->setBufWrite(*it);
+			client->setBufWrite(" ");
+			client->setBufWrite(chan->getChannelName());
+			client->setBufWrite(" :They aren't on that channel\r\n");
+			continue ;
+		}
+		chan->broadcast(":");
+		chan->broadcast(client->getNickName());
+		chan->broadcast(" KICK ");
+		chan->broadcast(chan->getChannelName());
+		if (cmd.size() != 4) {
+			chan->broadcast(" :");
+			chan->broadcast(*it);
+		} else {
+			chan->broadcast(*it);
+			chan->broadcast(" :");
+			chan->broadcast(cmd[3]);
+		}
+		chan->broadcast("\r\n");
+		
+		chan->removeClient(client->getFd());
+		banned->removeChannel(chan->getChannelName());
+	}
 }
 
 void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
 
 }
+
 void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 
 }

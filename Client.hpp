@@ -53,6 +53,7 @@ class Client {
 		void	makeProtocol();
 
 		void 	addChannel(const std::string& name, Channel* channel);
+		void 	removeChannel(const std::string& name);
 
 		// useless?
 		void clearBufRead();

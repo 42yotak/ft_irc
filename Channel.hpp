@@ -20,5 +20,7 @@ class Channel {
 
 		void broadcast(const std::string& msg);
 		void addClient(int fd, Client* client);
-		void removeClient(const std::string& nick);
+		void removeClient(int fd);
+		
+		Client* searchNickname(const std::string& nick);
 };

@@ -20,6 +20,7 @@ Client::Client(int fd) {
 Client::~Client() {
 	//client 삭제할 때 할당된 fd반환
 	this->_isDead = true;
+	this->_channels.clear();
 }
 
 std::string &Client::getBufRead() {
@@ -117,6 +118,10 @@ void Client::makeProtocol() {
 
 void 	Client::addChannel(const std::string& name, Channel* channel) {
 	this->_channels.insert(std::make_pair(name, channel));
+}
+
+void 	Client::removeChannel(const std::string& name) {
+	this->_channels.erase(name);
 }
 
 void Client::clearBufRead() {
