@@ -1,7 +1,7 @@
 NAME		=	ircserv
 
 CXX			=	c++
-CXXFLAGS	= -fsanitize=address -g3	#-Wall -Wextra -Werror -std=c++98
+CXXFLAGS	= -fsanitize=address -g3	-Wall -Wextra -Werror -std=c++98
 INCLUDES	=	-I.
 RM			=	rm -f
 
