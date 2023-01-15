@@ -55,7 +55,8 @@ class Server {
 
 		std::string	getPassword() const;
 
-		Channel* getChannel(std::string &name);
+		Channel*	getChannel(const std::string& name);
+		Client*		getClient(const std::string& nick);
 
 		void removeClient(int fd);
 

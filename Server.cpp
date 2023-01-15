@@ -185,12 +185,22 @@ std::string	Server::getPassword() const {
 	return this->_password;
 }
 
-Channel* Server::getChannel(std::string &name) {
+Channel* Server::getChannel(const std::string &name) {
 	std::map<std::string, Channel*>::iterator it = this->_channels.find(name);
 	if (it != this->_channels.end()) {
 		return (*it).second;
 	}
 	return this->_channels.insert(std::make_pair(name, new Channel(name))).first->second;
+}
+
+Client* Server::getClient(const std::string& nick) {
+	std::map<int, Client*>::iterator ite = this->_clients.end();
+	for (std::map<int, Client*>::iterator client = this->_clients.begin(); client != ite; client++) {
+		if (client->second->getNickName() == nick) {
+			return client->second;
+		}
+	}
+	return NULL;
 }
 
 void Server::removeClient(int fd) {

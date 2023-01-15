@@ -408,6 +408,14 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			client->setBufWrite(" :");
 			client->setBufWrite(cmd[3]);
 			client->setBufWrite("\r\n");
+			Client* receiver = Server::callServer().getClient(*target);
+			receiver->setBufWrite(":");
+			receiver->setBufWrite(client->getNickName());
+			receiver->setBufWrite(" PRIVMSG ");
+			receiver->setBufWrite(*target);
+			receiver->setBufWrite(" :");
+			receiver->setBufWrite(cmd[3]);
+			receiver->setBufWrite("\r\n");
 		} 
 	}
 }
