@@ -381,6 +381,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 				client->setBufWrite(" ");
 				client->setBufWrite(*target);
 				client->setBufWrite(" :You cannot send external messages to this channel\r\n");
+				continue;
 			}
 			chanIt->second->broadcast(":");
 			chanIt->second->broadcast(client->getNickName());
@@ -421,5 +422,5 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 }
 
 void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
-
+	
 }
