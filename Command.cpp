@@ -258,18 +258,18 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 				// :yotak PART :#gun
 				// :yotak PART #gun :bye
 				Channel *chan = client->getChannels().find(*it)->second;
-				chan->broadcast(client, ":");
-				chan->broadcast(client, client->getNickName());
-				chan->broadcast(client, " PART ");
+				chan->broadcast(NULL, ":");
+				chan->broadcast(NULL, client->getNickName());
+				chan->broadcast(NULL, " PART ");
 				if (cmd.size() == 2) {
-					chan->broadcast(client, " :");
-					chan->broadcast(client, (*it));
+					chan->broadcast(NULL, " :");
+					chan->broadcast(NULL, (*it));
 				} else {
-					chan->broadcast(client, (*it));
-					chan->broadcast(client, " :");
-					chan->broadcast(client, cmd[2]);
+					chan->broadcast(NULL, (*it));
+					chan->broadcast(NULL, " :");
+					chan->broadcast(NULL, cmd[2]);
 				}
-				chan->broadcast(client, "\r\n");
+				chan->broadcast(NULL, "\r\n");
 				
 				chan->removeClient(client->getFd());
 				client->removeChannel(chan->getChannelName());
@@ -328,20 +328,20 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 			client->setBufWrite(" :They aren't on that channel\r\n");
 			continue ;
 		}
-		chan->broadcast(client, ":");
-		chan->broadcast(client, client->getNickName());
-		chan->broadcast(client, " KICK ");
-		chan->broadcast(client, chan->getChannelName());
+		chan->broadcast(NULL, ":");
+		chan->broadcast(NULL, client->getNickName());
+		chan->broadcast(NULL, " KICK ");
+		chan->broadcast(NULL, chan->getChannelName());
 		if (cmd.size() != 4) {
-			chan->broadcast(client, " :");
-			chan->broadcast(client, *it);
+			chan->broadcast(NULL, " :");
+			chan->broadcast(NULL, *it);
 		} else {
-			chan->broadcast(client, " ");
-			chan->broadcast(client, *it);
-			chan->broadcast(client, " :");
-			chan->broadcast(client, cmd[3]);
+			chan->broadcast(NULL, " ");
+			chan->broadcast(NULL, *it);
+			chan->broadcast(NULL, " :");
+			chan->broadcast(NULL, cmd[3]);
 		}
-		chan->broadcast(client, "\r\n");
+		chan->broadcast(NULL, "\r\n");
 		
 		chan->removeClient(client->getFd());
 		banned->removeChannel(chan->getChannelName());
