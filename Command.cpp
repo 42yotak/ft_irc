@@ -54,13 +54,8 @@ void Command::cmdPass(std::vector<std::string> cmd, Client *client) {
 	}
 	if (cmd[1] == Server::callServer().getPassword())
 		client->setIsRegistered(PASS);
-<<<<<<< HEAD
 	else
 		client->offIsRegistered(PASS);
-=======
-	// else
-	// 	client->setIsRegistered(~PASS);
->>>>>>> f6039ecc71a650c719ffe14e9c93796f4a9bd03e
 }
 
 void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
@@ -122,7 +117,7 @@ void Command::cmdUser(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite(" USER :Not enough parameters\r\n");
 		return ;
 	}
-	if (client->getIsRegistered() & REGISTER) {
+	if (client->getIsRegistered() & USER) {
 		// :irc.local 462 * :You may not reregister -> you already
 		client->setBufWrite("462 ");
 		client->setBufWrite(client->getNickName());

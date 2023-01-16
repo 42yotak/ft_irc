@@ -66,14 +66,11 @@ void Client::setBufWrite(const std::string &msg) {
 void Client::setIsRegistered(int cmd) {
 	this->_isRegistered |= cmd;
 	std::cout << '\t' << this->_isRegistered << std::endl;
-<<<<<<< HEAD
 }
 
 void Client::offIsRegistered(int cmd) {
 	this->_isRegistered &= ~cmd;
 	std::cout << '\t' << this->_isRegistered << std::endl;
-=======
->>>>>>> f6039ecc71a650c719ffe14e9c93796f4a9bd03e
 }
 
 void	Client::setNickName(const std::string &nickName) {
