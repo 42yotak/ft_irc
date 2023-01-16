@@ -175,18 +175,18 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 	}
 	std::vector<std::string> channels = split(cmd[1], ",");
 	std::vector<std::string>::iterator it;
-	
+
 	for (it = channels.begin(); it != channels.end(); it++) {
 		Channel* chan = Server::callServer().getChannel(*it);
 
 		chan->addClient(client->getFd(), client);
 		client->addChannel(*it, chan);
 
-		chan->broadcast(client, ":");
-		chan->broadcast(client, client->getNickName());
-		chan->broadcast(client, " JOIN :");
-		chan->broadcast(client, *it);
-		chan->broadcast(client, "\r\n");
+		chan->broadcast(NULL, ":");
+		chan->broadcast(NULL, client->getNickName());
+		chan->broadcast(NULL, " JOIN :");
+		chan->broadcast(NULL, *it);
+		chan->broadcast(NULL, "\r\n");
 
 		// 353 :<client> <symbol> <channel> :[prefix]<nick>{ [prefix]<nick>}
 		client->setBufWrite("353 ");
@@ -208,7 +208,7 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" ");
 		client->setBufWrite(*it);
-		client->setBufWrite(" :End of /NAMES list\r\n");	
+		client->setBufWrite(" :End of /NAMES list\r\n");
 	}
 }
 
@@ -223,7 +223,7 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 	// 403 yotak <channelname> :No such channel
 	std::vector<std::string> channels = split(cmd[1], ",");
 	std::vector<std::string>::iterator it;
-	
+
 	for (it = channels.begin(); it != channels.end(); it++) {
 		if (Server::callServer().isExistChannel(*it)) {
 			if (client->getChannels().find(*it) == client->getChannels().end()) {
@@ -238,7 +238,9 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 				Channel *chan = client->getChannels().find(*it)->second;
 				chan->broadcast(NULL, ":");
 				chan->broadcast(NULL, client->getNickName());
-				chan->broadcast(NULL, "!*@PokémonGo");
+				chan->broadcast(NULL, "!~");
+				chan->broadcast(NULL, client->getNickName());
+				chan->broadcast(NULL, "@PokémonGo");
 				chan->broadcast(NULL, " PART ");
 				if (cmd.size() == 2) {
 					// chan->broadcast(NULL, " ");
@@ -249,7 +251,7 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 					chan->broadcast(NULL, cmd[2]);
 				}
 				chan->broadcast(NULL, "\r\n");
-				
+
 				chan->removeClient(client->getFd());
 				client->removeChannel(chan->getChannelName());
 			}
@@ -270,7 +272,7 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite(" KICK :Not enough parameters\r\n");
 		return ;
 	}
-	
+
 	if (!Server::callServer().isExistChannel(cmd[1])) {
 			client->setBufWrite("403 ");
 			client->setBufWrite(client->getNickName());
@@ -282,7 +284,7 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 
 	Channel*									chan = Server::callServer().getChannel(cmd[1]);
 	if (!(client->getNickName() == chan->getClients().begin()->second->getNickName())) {
-		// 482(<client> <channel> :You're not channel operator) 
+		// 482(<client> <channel> :You're not channel operator)
 		// :irc.atw-inter.net 482 yuje #4242 :You're not channel operator
 		client->setBufWrite("482 ");
 		client->setBufWrite(client->getNickName());
@@ -309,6 +311,9 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 		}
 		chan->broadcast(NULL, ":");
 		chan->broadcast(NULL, client->getNickName());
+		chan->broadcast(NULL, "!~");
+		chan->broadcast(NULL, client->getNickName());
+		chan->broadcast(NULL, "@PokémonGo");
 		chan->broadcast(NULL, " KICK ");
 		chan->broadcast(NULL, chan->getChannelName());
 		if (cmd.size() != 4) {
@@ -317,12 +322,12 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 		} else {
 			chan->broadcast(NULL, " ");
 			chan->broadcast(NULL, *it);
-			chan->broadcast(NULL, " :");
+			chan->broadcast(NULL, " ");
 			chan->broadcast(NULL, cmd[3]);
 		}
 		chan->broadcast(NULL, "\r\n");
-		
-		chan->removeClient(client->getFd());
+
+		chan->removeClient(banned->getFd());
 		banned->removeChannel(chan->getChannelName());
 	}
 }
@@ -391,7 +396,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			receiver->setBufWrite(" :");
 			receiver->setBufWrite(cmd[2]);
 			receiver->setBufWrite("\r\n");
-		} 
+		}
 	}
 }
 
@@ -455,6 +460,6 @@ void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
 			receiver->setBufWrite(" :");
 			receiver->setBufWrite(cmd[2]);
 			receiver->setBufWrite("\r\n");
-		} 
+		}
 	}
 }
