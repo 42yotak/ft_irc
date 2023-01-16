@@ -7,6 +7,7 @@
 
 #include <unistd.h>
 
+#define DEFAULT 0
 #define PASS 1
 #define NICK 2
 #define USER 4
