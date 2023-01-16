@@ -64,6 +64,12 @@ void Client::setBufWrite(const std::string &msg) {
 
 void Client::setIsRegistered(int cmd) {
 	this->_isRegistered |= cmd;
+	std::cout << '\t' << this->_isRegistered << std::endl;
+}
+
+void Client::offIsRegistered(int cmd) {
+	this->_isRegistered &= ~cmd;
+	std::cout << '\t' << this->_isRegistered << std::endl;
 }
 
 void	Client::setNickName(const std::string &nickName) {
@@ -86,6 +92,7 @@ void Client::makeProtocol() {
 	size_t delimiter;
 	while ((delimiter = std::min(this->buf_read.find('\r'), this->buf_read.find('\n'))) != std::string::npos) {
 		std::string cmd = this->buf_read.substr(0, delimiter);
+		std::cout << "makeProtocol: [" << cmd << "]\n";
 		this->buf_read.erase(0, delimiter + 1);
 		if (cmd == "") continue;
 

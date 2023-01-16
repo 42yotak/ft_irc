@@ -39,6 +39,7 @@ std::vector<std::string>	split(std::string str, std::string delimiter) {
 	while ((pos = str.find(delimiter)) != std::string::npos) {
 		if (str[0] == ':') {
 			ret.push_back(str.substr(1, std::string::npos));
+			str.clear();
 			break;
 		}
 		ret.push_back(str.substr(0, pos));

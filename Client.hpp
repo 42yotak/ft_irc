@@ -45,6 +45,7 @@ class Client {
 
 		void	setBufWrite(const std::string &msg);
 		void	setIsRegistered(int cmd);
+		void	offIsRegistered(int cmd);
 		void	setNickName(const std::string &nickName);
 		void	setUserName(const std::string &userName);
 		void	setRealName(const std::string &realName);

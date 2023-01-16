@@ -18,8 +18,8 @@ class Channel {
 		std::string& getChannelName();
 		std::map<int, Client *>& getClients();
 
-		void broadcast(const std::string& msg);
-		void addClient(int fd, Client* client);
+		void broadcast(Client* self, const std::string& msg);
+ 		void addClient(int fd, Client* client);
 		void removeClient(int fd);
 		
 		Client* searchNickname(const std::string& nick);

@@ -17,10 +17,11 @@ std::map<int, Client *>& Channel::getClients() {
 	return this->_clients;
 }
 
-void Channel::broadcast(const std::string &msg) {
+void Channel::broadcast(Client* self, const std::string &msg) {
 	std::map<int, Client*>::iterator it;
 	for (it = this->_clients.begin(); it != this->_clients.end(); it++) {
-		(*it).second->setBufWrite(msg);
+		if ((*it).second != self)
+			(*it).second->setBufWrite(msg);
 	}
 }
 

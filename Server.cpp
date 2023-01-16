@@ -105,17 +105,17 @@ void Server::on(std::string port, std::string password) {
 					this->servRecv(fd, client->getBufRead());
 					if (_clients.find(fd) != _clients.end()) {
 						client->makeProtocol();
-						client->clearBufRead();
+						// client->clearBufRead();
 					}
 				}
 			}
 			if (FD_ISSET(fd, &cpWriteFds)) {
 				// std::cout << "write!!" << std::endl;
-				std::map<int, Client*>::iterator clnt = this->_clients.find(fd);
-				if (clnt != this->_clients.end()) {
-					this->servSend(fd, clnt->second->getBufWrite());
-					clnt->second->clearBufWrite();
-					if (clnt->second->getIsDead())
+				std::map<int, Client*>::iterator clientIt = this->_clients.find(fd);
+				if (clientIt != this->_clients.end()) {
+					this->servSend(fd, clientIt->second->getBufWrite());
+					clientIt->second->clearBufWrite();
+					if (clientIt->second->getIsDead())
 						removeClient(fd);
 				}
 			}
@@ -139,14 +139,12 @@ void Server::servRecv(int fd, std::string &buf_read) {
 	try {
 		nbytes = recv(fd, (void *)buf, 512, MSG_DONTWAIT);
 		std::cout << "nbytes: " << nbytes << std::endl;
-			//FIXME: EAGAIN
-		if (nbytes > 510 || (nbytes == ERROR && errno != EAGAIN)) {
+
+		if (nbytes > 510 || nbytes == ERROR) {
 			throw(std::runtime_error("recv message "));
 		}
 		// close request
 		if (nbytes == 0) {
-			FD_CLR(fd, &this->_readFds);
-			FD_CLR(fd, &this->_writeFds);
 			this->removeClient(fd);
 			return;
 		}
@@ -154,8 +152,6 @@ void Server::servRecv(int fd, std::string &buf_read) {
 		std::cerr << e.what() << std::endl;
 
 			//FIXME: xxx
-			FD_CLR(fd, &this->_readFds);
-			FD_CLR(fd, &this->_writeFds);
 			this->removeClient(fd);
 			return;
 	}
@@ -175,8 +171,6 @@ void Server::servSend(int fd, std::string &buf_write) {
 		std::cerr << e.what() << std::endl;
 
 			//FIXME: xxx
-			FD_CLR(fd, &this->_readFds);
-			FD_CLR(fd, &this->_writeFds);
 			this->removeClient(fd);
 			return;
 	}
@@ -210,6 +204,8 @@ void Server::removeClient(int fd) {
 		delete (*it).second;
 		this->_clients.erase(it);
 		close(fd);
+		FD_CLR(fd, &this->_readFds);
+		FD_CLR(fd, &this->_writeFds);
 	}
 	std::cout << RED "remove client end" NC << std::endl;
 }

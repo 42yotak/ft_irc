@@ -55,7 +55,7 @@ void Command::cmdPass(std::vector<std::string> cmd, Client *client) {
 	if (cmd[1] == Server::callServer().getPassword())
 		client->setIsRegistered(PASS);
 	else
-		client->setIsRegistered(~PASS);
+		client->offIsRegistered(PASS);
 }
 
 void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
@@ -165,19 +165,20 @@ void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 	if (cmd.size() == 1) {
 		cmd.push_back(std::string("Client exited"));
 	}
-	client->setIsDead();
 	client->setBufWrite("Error :");
 	client->setBufWrite("Closing link: ");
 	client->setBufWrite("(" + client->getNickName() + ")");
 	client->setBufWrite("[Quit: " + cmd[1] + "]\r\n");
 	// broadcasting 127.000.000.001.06664-127.000.000.001.38276: :quit_ted!root@127.0.0.1 QUIT :Quit: leaving
-	std::map<std::string, Channel *>::iterator it = client->getChannels().begin();
+	std::map<std::string, Channel *>::iterator channel = client->getChannels().begin();
 	std::map<std::string, Channel *>::iterator ite = client->getChannels().end();
 	std::string broadcastMsg(":" + client->getNickName() + " QUIT :Quit: " + cmd[1]);
-	while (it != ite) {
-		(*it).second->broadcast(broadcastMsg);
-		++it;
+	while (channel != ite) {
+		(*channel).second->broadcast(client, broadcastMsg);
+		(*channel).second->removeClient(client->getFd());
+		++channel;
 	}
+	client->setIsDead();
 }
 
 void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
@@ -195,11 +196,11 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 		client->addChannel(*it, chan);
 
 		// channel에 있는 모든 client한테 joined msg 출력
-		chan->broadcast(":");
-		chan->broadcast(client->getNickName());
-		chan->broadcast(" JOIN :");
-		chan->broadcast(*it);
-		chan->broadcast("\r\n");
+		chan->broadcast(client, ":");
+		chan->broadcast(client, client->getNickName());
+		chan->broadcast(client, " JOIN :");
+		chan->broadcast(client, *it);
+		chan->broadcast(client, "\r\n");
 
 		// client한테 출력
 			// 353 :<client> <symbol> <channel> :[prefix]<nick>{ [prefix]<nick>}
@@ -256,18 +257,18 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 				// :yotak PART :#gun
 				// :yotak PART #gun :bye
 				Channel *chan = client->getChannels().find(*it)->second;
-				chan->broadcast(":");
-				chan->broadcast(client->getNickName());
-				chan->broadcast(" PART ");
+				chan->broadcast(client, ":");
+				chan->broadcast(client, client->getNickName());
+				chan->broadcast(client, " PART ");
 				if (cmd.size() == 2) {
-					chan->broadcast(" :");
-					chan->broadcast((*it));
+					chan->broadcast(client, " :");
+					chan->broadcast(client, (*it));
 				} else {
-					chan->broadcast((*it));
-					chan->broadcast(" :");
-					chan->broadcast(cmd[2]);
+					chan->broadcast(client, (*it));
+					chan->broadcast(client, " :");
+					chan->broadcast(client, cmd[2]);
 				}
-				chan->broadcast("\r\n");
+				chan->broadcast(client, "\r\n");
 				
 				chan->removeClient(client->getFd());
 				client->removeChannel(chan->getChannelName());
@@ -326,20 +327,20 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 			client->setBufWrite(" :They aren't on that channel\r\n");
 			continue ;
 		}
-		chan->broadcast(":");
-		chan->broadcast(client->getNickName());
-		chan->broadcast(" KICK ");
-		chan->broadcast(chan->getChannelName());
+		chan->broadcast(client, ":");
+		chan->broadcast(client, client->getNickName());
+		chan->broadcast(client, " KICK ");
+		chan->broadcast(client, chan->getChannelName());
 		if (cmd.size() != 4) {
-			chan->broadcast(" :");
-			chan->broadcast(*it);
+			chan->broadcast(client, " :");
+			chan->broadcast(client, *it);
 		} else {
-			chan->broadcast(" ");
-			chan->broadcast(*it);
-			chan->broadcast(" :");
-			chan->broadcast(cmd[3]);
+			chan->broadcast(client, " ");
+			chan->broadcast(client, *it);
+			chan->broadcast(client, " :");
+			chan->broadcast(client, cmd[3]);
 		}
-		chan->broadcast("\r\n");
+		chan->broadcast(client, "\r\n");
 		
 		chan->removeClient(client->getFd());
 		banned->removeChannel(chan->getChannelName());
@@ -384,13 +385,13 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 				client->setBufWrite(" :You cannot send external messages to this channel\r\n");
 				continue;
 			}
-			chanIt->second->broadcast(":");
-			chanIt->second->broadcast(client->getNickName());
-			chanIt->second->broadcast(" PRIVMSG ");
-			chanIt->second->broadcast(*target);
-			chanIt->second->broadcast(" :");
-			chanIt->second->broadcast(cmd[2]);
-			chanIt->second->broadcast("\r\n");
+			chanIt->second->broadcast(client, ":");
+			chanIt->second->broadcast(client, client->getNickName());
+			chanIt->second->broadcast(client, " PRIVMSG ");
+			chanIt->second->broadcast(client, *target);
+			chanIt->second->broadcast(client, " ");
+			chanIt->second->broadcast(client, cmd[2]);
+			chanIt->second->broadcast(client, "\r\n");
 		} else {
 			// user
 			//401 yotak #4242cluster2 :No such nick/channel
@@ -454,13 +455,13 @@ void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
 				client->setBufWrite(" :You cannot send external messages to this channel\r\n");
 				continue;
 			}
-			chanIt->second->broadcast(":");
-			chanIt->second->broadcast(client->getNickName());
-			chanIt->second->broadcast(" NOTICE ");
-			chanIt->second->broadcast(*target);
-			chanIt->second->broadcast(" :");
-			chanIt->second->broadcast(cmd[2]);
-			chanIt->second->broadcast("\r\n");
+			chanIt->second->broadcast(client, ":");
+			chanIt->second->broadcast(client, client->getNickName());
+			chanIt->second->broadcast(client, " NOTICE ");
+			chanIt->second->broadcast(client, *target);
+			chanIt->second->broadcast(client, " :");
+			chanIt->second->broadcast(client, cmd[2]);
+			chanIt->second->broadcast(client, "\r\n");
 		} else {
 			// user
 			//401 yotak #4242cluster2 :No such nick/channel
