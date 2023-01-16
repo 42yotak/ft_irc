@@ -4,9 +4,10 @@
 #include "Utils.hpp"
 
 Client::Client(int fd) {
+	std::cout << BLUE "client is created" NC << std::endl;
 	this->_fd = fd;
 
-	this->_isRegistered = 0;
+	this->_isRegistered = DEFAULT;
 	this->buf_read[0] = '\0';
 	this->buf_write[0] = '\0';
 
@@ -64,6 +65,7 @@ void Client::setBufWrite(const std::string &msg) {
 
 void Client::setIsRegistered(int cmd) {
 	this->_isRegistered |= cmd;
+	std::cout << '\t' << this->_isRegistered << std::endl;
 }
 
 void	Client::setNickName(const std::string &nickName) {
