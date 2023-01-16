@@ -54,8 +54,13 @@ void Command::cmdPass(std::vector<std::string> cmd, Client *client) {
 	}
 	if (cmd[1] == Server::callServer().getPassword())
 		client->setIsRegistered(PASS);
+<<<<<<< HEAD
 	else
 		client->offIsRegistered(PASS);
+=======
+	// else
+	// 	client->setIsRegistered(~PASS);
+>>>>>>> f6039ecc71a650c719ffe14e9c93796f4a9bd03e
 }
 
 void Command::cmdNick(std::vector<std::string> cmd, Client *client) {
@@ -108,8 +113,6 @@ bool Command::isValidName(const std::string& name) {
 }
 
 void Command::cmdUser(std::vector<std::string> cmd, Client *client) {
-	// yotak1
-	// USER root * 0 :root
 	// USER [username] [nickname] [address] [:realname]
 	if (cmd.size() < 5) {
 		// <command> :<reason>
@@ -118,10 +121,9 @@ void Command::cmdUser(std::vector<std::string> cmd, Client *client) {
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" USER :Not enough parameters\r\n");
 		return ;
-		return ;
 	}
-	if (client->getIsRegistered() & USER) {
-		// :irc.local 462 * :You may not reregister
+	if (client->getIsRegistered() & REGISTER) {
+		// :irc.local 462 * :You may not reregister -> you already
 		client->setBufWrite("462 ");
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" :You may not reregister\r\n");
@@ -186,6 +188,10 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 	NUMERIC JOIN 461 403 353 366
 	EXAMPLE :<UserJID> JOIN :<ChannelName>
 	*/
+	if (cmd.size() == 1) {
+		client->setBufWrite("ircserv: Not enough parameters given\r\n");
+		return ;
+	}
 	std::vector<std::string> channels = split(cmd[1], ",");
 	std::vector<std::string>::iterator it;
 	
