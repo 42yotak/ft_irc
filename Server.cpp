@@ -53,7 +53,6 @@ void Server::on(std::string port, std::string password) {
 	int	selectFds = 0;
 	int	maxFd = this->_servSock;
 
-	// for accept()
 	struct sockaddr_in	clientAdr;
 	int									clientLen, clientFd = 0;
 
@@ -74,10 +73,7 @@ void Server::on(std::string port, std::string password) {
 			continue ;
 
 		for (int fd = 0; fd < maxFd + 1; fd++) {
-
-			// revc from client
 			if (FD_ISSET(fd, &cpReadFds)) {
-				// accept call
 				if (fd == this->_servSock) {
 					std::cout << "fd: " << fd << " servsock: " << this->_servSock << std::endl;
 
@@ -100,17 +96,14 @@ void Server::on(std::string port, std::string password) {
 						std::cerr << e.what() << std::endl;
 					}
 				} else {
-					// TODO: read message
 					Client *client = this->_clients[fd];
 					this->servRecv(fd, client->getBufRead());
 					if (_clients.find(fd) != _clients.end()) {
 						client->makeProtocol();
-						// client->clearBufRead();
 					}
 				}
 			}
 			if (FD_ISSET(fd, &cpWriteFds)) {
-				// std::cout << "write!!" << std::endl;
 				std::map<int, Client*>::iterator clientIt = this->_clients.find(fd);
 				if (clientIt != this->_clients.end()) {
 					this->servSend(fd, clientIt->second->getBufWrite());
@@ -143,15 +136,12 @@ void Server::servRecv(int fd, std::string &buf_read) {
 		if (nbytes > 510 || nbytes == ERROR) {
 			throw(std::runtime_error("recv message "));
 		}
-		// close request
 		if (nbytes == 0) {
 			this->removeClient(fd);
 			return;
 		}
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
-
-			//FIXME: xxx
 			this->removeClient(fd);
 			return;
 	}
@@ -169,10 +159,8 @@ void Server::servSend(int fd, std::string &buf_write) {
 		buf_write.clear();
 	} catch(std::exception &e) {
 		std::cerr << e.what() << std::endl;
-
-			//FIXME: xxx
-			this->removeClient(fd);
-			return;
+		this->removeClient(fd);
+		return;
 	}
 }
 

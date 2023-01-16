@@ -20,16 +20,13 @@ void Command::welcomeProtocol(std::vector<std::string> cmds, Client *client) {
 	} else if (cmds[0] == "NICK") {
 		this->cmdNick(cmds, client);
 	} else if (cmds[0] == "CAP") {
-		//ignore
 	} else {
-		//451 <client> :You have not registered
 		client->setBufWrite("451 ");
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite("  :You have not registered\r\n");
 	}
 	if (client->getIsRegistered() >= (NICK | USER)) {
 		if (client->getIsRegistered() & PASS) {
-			// buf_write에 welcome message 쓰기
 			// <source> 001 :<client> :Welcome to the <networkname> Network, <nick>
 			client->setBufWrite("001 ");
 			client->setBufWrite(client->getNickName());
@@ -37,7 +34,6 @@ void Command::welcomeProtocol(std::vector<std::string> cmds, Client *client) {
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite("\r\n");
 		} else {
-			// ERROR :Closing link: [Access denied by configuration]
 			client->setBufWrite("ERROR :Closing link: [Access denied by configuration]\r\n");
 		}
 	}
@@ -153,12 +149,6 @@ void Command::cmdPing(std::vector<std::string> cmd, Client *client) {
 
 void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 	// QUIT [<message>]
-	// QUIT 후 메시지가 없다면 QUIT :leaving
-	// QUIT 뒤는 무조건 메시지 처리 
-	/* 
-	* 127.000.000.001.54630-127.000.000.001.06667: QUIT :#42seoul
-	* 127.000.000.001.06667-127.000.000.001.54630: ERROR :Closing link: (root@127.0.0.1) [Quit: #42seoul]
-	*/
 	if (cmd.size() == 1) {
 		cmd.push_back(std::string("Client exited"));
 	}
@@ -166,7 +156,7 @@ void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 	client->setBufWrite("Closing link: ");
 	client->setBufWrite("(" + client->getNickName() + ")");
 	client->setBufWrite("[Quit: " + cmd[1] + "]\r\n");
-	// broadcasting 127.000.000.001.06664-127.000.000.001.38276: :quit_ted!root@127.0.0.1 QUIT :Quit: leaving
+
 	std::map<std::string, Channel *>::iterator channel = client->getChannels().begin();
 	std::map<std::string, Channel *>::iterator ite = client->getChannels().end();
 	std::string broadcastMsg(":" + client->getNickName() + " QUIT :Quit: " + cmd[1]);
@@ -179,10 +169,6 @@ void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 }
 
 void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
-	/* 
-	NUMERIC JOIN 461 403 353 366
-	EXAMPLE :<UserJID> JOIN :<ChannelName>
-	*/
 	if (cmd.size() == 1) {
 		client->setBufWrite("ircserv: Not enough parameters given\r\n");
 		return ;
@@ -192,19 +178,17 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 	
 	for (it = channels.begin(); it != channels.end(); it++) {
 		Channel* chan = Server::callServer().getChannel(*it);
-		// channel에 client 추가
+
 		chan->addClient(client->getFd(), client);
 		client->addChannel(*it, chan);
 
-		// channel에 있는 모든 client한테 joined msg 출력
 		chan->broadcast(client, ":");
 		chan->broadcast(client, client->getNickName());
 		chan->broadcast(client, " JOIN :");
 		chan->broadcast(client, *it);
 		chan->broadcast(client, "\r\n");
 
-		// client한테 출력
-			// 353 :<client> <symbol> <channel> :[prefix]<nick>{ [prefix]<nick>}
+		// 353 :<client> <symbol> <channel> :[prefix]<nick>{ [prefix]<nick>}
 		client->setBufWrite("353 ");
 		client->setBufWrite(client->getNickName());
 		client->setBufWrite(" = ");
@@ -229,10 +213,7 @@ void Command::cmdJoin(std::vector<std::string> cmd, Client *client) {
 }
 
 void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
-	/*
-	NUMERIC 461 403 442
-	*/
-	// 461
+
 	if (cmd.size() < 2) {
 		client->setBufWrite("461 ");
 		client->setBufWrite(client->getNickName());
@@ -254,9 +235,6 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 					client->setBufWrite(*it);
 					client->setBufWrite(" :You're not on that channel\r\n");
 			} else {
-				// set message
-				// :yotak PART :#gun
-				// :yotak PART #gun :bye
 				Channel *chan = client->getChannels().find(*it)->second;
 				chan->broadcast(NULL, ":");
 				chan->broadcast(NULL, client->getNickName());
@@ -349,12 +327,6 @@ void Command::cmdKick(std::vector<std::string> cmd, Client *client) {
 }
 
 void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
-	/* PRIVMSG 401 404 461
-		:yujerry PRIVMSG yotak :bye
-		461 not enough parameter
-		401 yotak #4242cluster2 :No such nick/channel
-		404 user2 #42seoul :You cannot send external messages to this channel whilst the +n (noextmsg) mode is set.
-	*/
 	if (cmd.size() < 3) {
 		client->setBufWrite("461 ");
 		client->setBufWrite(client->getNickName());
@@ -366,7 +338,6 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 	std::vector<std::string>::iterator ite = targets.end();
 	for (std::vector<std::string>::iterator target = targets.begin(); target != ite; target++) {
 		if ((*target)[0] == '#') {
-			// channel
 			//401 yotak #4242cluster2 :No such nick/channel
 			if (!Server::callServer().isExistChannel(*target)) {
 				client->setBufWrite("401 ");
@@ -394,7 +365,6 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			chanIt->second->broadcast(client, cmd[2]);
 			chanIt->second->broadcast(client, "\r\n");
 		} else {
-			// user
 			//401 yotak #4242cluster2 :No such nick/channel
 			if (!Server::callServer().isUsedNickname(*target)) {
 				client->setBufWrite("401 ");
@@ -404,7 +374,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 				client->setBufWrite(" :No such nick\r\n");
 				continue;
 			}
-			//:yujerry PRIVMSG yotak :bye
+
 			client->setBufWrite(":");
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite(" PRIVMSG ");
@@ -436,8 +406,6 @@ void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
 	std::vector<std::string>::iterator ite = targets.end();
 	for (std::vector<std::string>::iterator target = targets.begin(); target != ite; target++) {
 		if ((*target)[0] == '#') {
-			// channel
-			//401 yotak #4242cluster2 :No such nick/channel
 			if (!Server::callServer().isExistChannel(*target)) {
 				client->setBufWrite("401 ");
 				client->setBufWrite(client->getNickName());
@@ -447,7 +415,6 @@ void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
 				continue;
 			}
 			std::map<std::string, Channel *>::iterator chanIt = client->getChannels().find(*target);
-			// 404 user2 #42seoul :You askjhflasdkjgh
 			if (chanIt == client->getChannels().end()) {
 				client->setBufWrite("404 ");
 				client->setBufWrite(client->getNickName());
@@ -464,8 +431,6 @@ void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
 			chanIt->second->broadcast(client, cmd[2]);
 			chanIt->second->broadcast(client, "\r\n");
 		} else {
-			// user
-			//401 yotak #4242cluster2 :No such nick/channel
 			if (!Server::callServer().isUsedNickname(*target)) {
 				client->setBufWrite("401 ");
 				client->setBufWrite(client->getNickName());
@@ -474,7 +439,6 @@ void Command::cmdNotice(std::vector<std::string> cmd, Client *client) {
 				client->setBufWrite(" :No such nick\r\n");
 				continue;
 			}
-			//:yujerry PRIVMSG yotak :bye
 			client->setBufWrite(":");
 			client->setBufWrite(client->getNickName());
 			client->setBufWrite(" NOTICE ");

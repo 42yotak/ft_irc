@@ -19,7 +19,6 @@ Client::Client(int fd) {
 }
 
 Client::~Client() {
-	//client 삭제할 때 할당된 fd반환
 	this->_isDead = true;
 	this->_channels.clear();
 }
@@ -59,18 +58,15 @@ std::map<std::string, Channel *>&	Client::getChannels() {
 }
 
 void Client::setBufWrite(const std::string &msg) {
-	// strlcat(this->buf_write, msg, strlen(this->buf_read));
 	this->buf_write += msg;
 }
 
 void Client::setIsRegistered(int cmd) {
 	this->_isRegistered |= cmd;
-	std::cout << '\t' << this->_isRegistered << std::endl;
 }
 
 void Client::offIsRegistered(int cmd) {
 	this->_isRegistered &= ~cmd;
-	std::cout << '\t' << this->_isRegistered << std::endl;
 }
 
 void	Client::setNickName(const std::string &nickName) {
@@ -117,10 +113,8 @@ void Client::makeProtocol() {
 		} else if (tokens[0] == "PRIVMSG") {
 			callCommand()->cmdPrivmsg(tokens, this);
 		} else {
-			std::cout << RED "NOT CORRECT COMMAND" NC << std::endl;
+			std::cout << RED "NOT OUR COMMAND" NC << std::endl;
 		}
-		// if not registered!
-		
 	}
 }
 
