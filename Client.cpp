@@ -8,8 +8,8 @@ Client::Client(int fd) {
 	this->_fd = fd;
 
 	this->_isRegistered = DEFAULT;
-	this->buf_read[0] = '\0';
-	this->buf_write[0] = '\0';
+	this->buf_read.clear();
+	this->buf_write.clear();
 
 	this->_nickName = "*";
 	this->_userName = "*";
@@ -21,6 +21,8 @@ Client::Client(int fd) {
 Client::~Client() {
 	this->_isDead = true;
 	this->_channels.clear();
+	this->clearBufRead();
+	this->clearBufWrite();
 }
 
 std::string &Client::getBufRead() {
@@ -89,7 +91,8 @@ void Client::makeProtocol() {
 	size_t delimiter;
 	while ((delimiter = std::min(this->buf_read.find('\r'), this->buf_read.find('\n'))) != std::string::npos) {
 		std::string cmd = this->buf_read.substr(0, delimiter);
-		std::cout << "makeProtocol: [" << cmd << "]\n";
+		std::cout << GREEN << this->getFd();
+		std::cout << " ▶️ makeProtocol: [" << cmd << "]\n" NC;
 		this->buf_read.erase(0, delimiter + 1);
 		if (cmd == "") continue;
 

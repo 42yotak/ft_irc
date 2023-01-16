@@ -28,8 +28,8 @@ void Server::on(std::string port, std::string password) {
 	(void) password;
 	struct timeval timeout;
 	struct sockaddr_in servAdr;
-	timeout.tv_sec = 3;
-	timeout.tv_usec = 0;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 1000;
 
 	if ((this->_servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == ERROR)
 		throw std::runtime_error("socket ");
@@ -59,6 +59,8 @@ void Server::on(std::string port, std::string password) {
 	while(42) {
 		FD_COPY(&this->_readFds, &cpReadFds);
 		FD_COPY(&this->_writeFds, &cpWriteFds);
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 1000;
 
 		try {
 			if ((selectFds = select(maxFd + 1, &cpReadFds, NULL, NULL, &timeout)) == ERROR)
@@ -67,7 +69,7 @@ void Server::on(std::string port, std::string password) {
 			std::cerr << "errno: " << errno << std::endl;
 			std::cerr << e.what() << std::endl;
 		}
-		std::cout << "selectFds: " << selectFds << std::endl;
+		// std::cout << "selectFds: " << selectFds << std::endl;
 
 		if (selectFds == 0)
 			continue ;
@@ -133,7 +135,7 @@ void Server::servRecv(int fd, std::string &buf_read) {
 		nbytes = recv(fd, (void *)buf, 512, MSG_DONTWAIT);
 		std::cout << "nbytes: " << nbytes << std::endl;
 
-		if (nbytes > 510 || nbytes == ERROR) {
+		if (nbytes > 512 || nbytes == ERROR) {
 			throw(std::runtime_error("recv message "));
 		}
 		if (nbytes == 0) {
@@ -153,6 +155,7 @@ void Server::servRecv(int fd, std::string &buf_read) {
 
 void Server::servSend(int fd, std::string &buf_write) {
 	try {
+		std::cout << YELLOW << buf_write << NC << std::endl;
 		if (send(fd, buf_write.c_str(), buf_write.length(), 0) == ERROR) {
 			throw std::runtime_error("send message");
 		}

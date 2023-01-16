@@ -238,9 +238,10 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 				Channel *chan = client->getChannels().find(*it)->second;
 				chan->broadcast(NULL, ":");
 				chan->broadcast(NULL, client->getNickName());
+				chan->broadcast(NULL, "!*@PokémonGo");
 				chan->broadcast(NULL, " PART ");
 				if (cmd.size() == 2) {
-					chan->broadcast(NULL, " :");
+					// chan->broadcast(NULL, " ");
 					chan->broadcast(NULL, (*it));
 				} else {
 					chan->broadcast(NULL, (*it));
