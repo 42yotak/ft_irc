@@ -380,20 +380,12 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 				client->setBufWrite(" :No such nick\r\n");
 				continue;
 			}
-
-			client->setBufWrite(":");
-			client->setBufWrite(client->getNickName());
-			client->setBufWrite(" PRIVMSG ");
-			client->setBufWrite(*target);
-			client->setBufWrite(" :");
-			client->setBufWrite(cmd[2]);
-			client->setBufWrite("\r\n");
 			Client* receiver = Server::callServer().getClient(*target);
 			receiver->setBufWrite(":");
 			receiver->setBufWrite(client->getNickName());
 			receiver->setBufWrite(" PRIVMSG ");
 			receiver->setBufWrite(*target);
-			receiver->setBufWrite(" :");
+			receiver->setBufWrite(" ");
 			receiver->setBufWrite(cmd[2]);
 			receiver->setBufWrite("\r\n");
 		}
