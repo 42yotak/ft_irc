@@ -22,7 +22,6 @@ Client::~Client() {
 	this->_channels.clear();
 	this->clearBufRead();
 	this->clearBufWrite();
-	this->_isDead = true;
 }
 
 std::string &Client::getBufRead() {
