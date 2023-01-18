@@ -157,7 +157,7 @@ int Server::servRecv(int fd, std::string &buf_read) {
 
 void Server::servSend(int fd, std::string &buf_write) {
 	try {
-		std::cout << YELLOW << "fd[" << fd << "] "; 
+		std::cout << YELLOW << "fd[" << fd << "] ";
 		std::cout << buf_write << NC << "\n";
 		if (send(fd, buf_write.c_str(), buf_write.length(), 0) == ERROR) {
 			throw std::runtime_error("send message");
@@ -200,7 +200,7 @@ void Server::removeClient(int fd) {
 		while (channel != ite) {
 			(*channel).second->removeClient(it->second->getFd());
 			if (it->second->getIsDead() != false)
-				(*channel).second->broadcast(it->second, ":" + it->second->getNickName() + " QUIT :Quit: leaving\r\n");
+				(*channel).second->broadcast(it->second, std::string(":") + it->second->getNickName() + std::string(" QUIT :Quit: leaving\r\n"));
 			++channel;
 		}
 		delete (*it).second;

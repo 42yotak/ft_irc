@@ -153,13 +153,13 @@ void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 		cmd.push_back(std::string("Client exited"));
 	}
 	client->setBufWrite("Error :");
-	client->setBufWrite("Closing link: ");
-	client->setBufWrite("(" + client->getNickName() + ")");
-	client->setBufWrite("[Quit: " + cmd[1] + "]\r\n");
+	client->setBufWrite("Closing link: (");
+	client->setBufWrite(client->getNickName());
+	client->setBufWrite(")[Quit: " + cmd[1] + "]\r\n");
 
 	std::map<std::string, Channel *>::iterator channel = client->getChannels().begin();
 	std::map<std::string, Channel *>::iterator ite = client->getChannels().end();
-	std::string broadcastMsg(":" + client->getNickName() + " QUIT :Quit: " + cmd[1] + "\r\n");
+	std::string broadcastMsg(std::string(":") + client->getNickName() + std::string(" QUIT :Quit: ") + cmd[1] + std::string("\r\n"));
 	while (channel != ite) {
 		(*channel).second->broadcast(client, broadcastMsg);
 		++channel;
