@@ -247,7 +247,7 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 					chan->broadcast(NULL, (*it));
 				} else {
 					chan->broadcast(NULL, (*it));
-					chan->broadcast(NULL, " :");
+					chan->broadcast(NULL, " ");
 					chan->broadcast(NULL, cmd[2]);
 				}
 				chan->broadcast(NULL, "\r\n");
