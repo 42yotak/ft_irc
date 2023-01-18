@@ -133,7 +133,6 @@ int Server::servRecv(int fd, std::string &buf_read) {
 	buf[0] = '\0';
 	try {
 		nbytes = recv(fd, (void *)buf, 512, MSG_DONTWAIT);
-		std::cout << "nbytes: " << nbytes << std::endl;
 
 		if (nbytes > 512 || nbytes == ERROR) {
 			throw(std::runtime_error("recv message "));

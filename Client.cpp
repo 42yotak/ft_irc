@@ -91,8 +91,7 @@ void Client::makeProtocol() {
 	size_t delimiter;
 	while ((delimiter = std::min(this->buf_read.find('\r'), this->buf_read.find('\n'))) != std::string::npos) {
 		std::string cmd = this->buf_read.substr(0, delimiter);
-		std::cout << GREEN << this->getFd();
-		std::cout << " ▶️ makeProtocol: [" << cmd << "]\n" NC;
+
 		this->buf_read.erase(0, delimiter + 1);
 		if (cmd == "") continue;
 

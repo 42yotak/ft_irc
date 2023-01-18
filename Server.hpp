@@ -37,7 +37,6 @@ class Server {
 
 		Server();
 		Server(std::string port, std::string password);
-		~Server();
 
 	public:
 		static Server &callServer(std::string port = "6667", std::string password = "0000") {
@@ -63,4 +62,6 @@ class Server {
 
 		bool isUsedNickname(const std::string &nick);
 		bool isExistChannel(const std::string &name);
+
+		~Server();
 };
