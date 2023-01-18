@@ -208,7 +208,6 @@ void Server::removeClient(int fd) {
 		FD_CLR(fd, &this->_writeFds);
 	}
 	std::cout << RED "remove client end" NC << std::endl;
-
 }
 
 bool Server::isUsedNickname(const std::string &nick) {
