@@ -11,7 +11,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
  #include <fcntl.h>
- 
+
 #include <iostream>
 #include <exception>
 
@@ -51,7 +51,7 @@ class Server {
 		void on();
 		void off();
 
-		void servRecv(int fd, std::string &buf_read);
+		int servRecv(int fd, std::string &buf_read);
 		void servSend(int fd, std::string &buf_write);
 
 		std::string	getPassword() const;

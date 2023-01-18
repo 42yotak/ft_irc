@@ -63,7 +63,7 @@ void Server::on(std::string port, std::string password) {
 		timeout.tv_usec = 1000;
 
 		try {
-			if ((selectFds = select(maxFd + 1, &cpReadFds, NULL, NULL, &timeout)) == ERROR)
+			if ((selectFds = select(maxFd + 1, &cpReadFds, &cpWriteFds, NULL, &timeout)) == ERROR)
 				throw std::runtime_error("select ");
 		} catch(std::exception &e) {
 			std::cerr << "errno: " << errno << std::endl;
@@ -99,15 +99,15 @@ void Server::on(std::string port, std::string password) {
 					}
 				} else {
 					Client *client = this->_clients[fd];
-					this->servRecv(fd, client->getBufRead());
-					if (_clients.find(fd) != _clients.end()) {
+					if (!this->servRecv(fd, client->getBufRead())) {
 						client->makeProtocol();
 					}
 				}
 			}
+
 			if (FD_ISSET(fd, &cpWriteFds)) {
 				std::map<int, Client*>::iterator clientIt = this->_clients.find(fd);
-				if (clientIt != this->_clients.end()) {
+				if (clientIt != this->_clients.end() && !clientIt->second->getBufWrite().empty()) {
 					this->servSend(fd, clientIt->second->getBufWrite());
 					clientIt->second->clearBufWrite();
 					if (clientIt->second->getIsDead())
@@ -126,8 +126,8 @@ void Server::off() {
 	close(_servSock);
 }
 
-void Server::servRecv(int fd, std::string &buf_read) {
-	char		buf[512];
+int Server::servRecv(int fd, std::string &buf_read) {
+	char		buf[513];
 	ssize_t	nbytes;
 
 	buf[0] = '\0';
@@ -140,17 +140,18 @@ void Server::servRecv(int fd, std::string &buf_read) {
 		}
 		if (nbytes == 0) {
 			this->removeClient(fd);
-			return;
+			return 1;
 		}
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
-			this->removeClient(fd);
-			return;
+		this->removeClient(fd);
+		return 1;
 	}
 	buf[nbytes] = '\0';
 
 	buf_read += std::string(buf);
 	std::cout << PURPLE << std::string(buf) << NC;
+	return 0;
 }
 
 void Server::servSend(int fd, std::string &buf_write) {

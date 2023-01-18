@@ -16,6 +16,7 @@ class Command {
 		void cmdUser(std::vector<std::string> cmd, Client *client);
 		void cmdPing(std::vector<std::string> cmd, Client *client);
 		void cmdQuit(std::vector<std::string> cmd, Client *client);
+		// void cmdWho(std::vector<std::string> cmd, Client *client);
 
 		void cmdJoin(std::vector<std::string> cmd, Client *client);
 		void cmdPart(std::vector<std::string> cmd, Client *client);
@@ -23,7 +24,7 @@ class Command {
 
 		void cmdNotice(std::vector<std::string> cmd, Client *client);
 		void cmdPrivmsg(std::vector<std::string> cmd, Client *client);
-	
+
 	private:
 		bool isValidName(const std::string &name);
 };

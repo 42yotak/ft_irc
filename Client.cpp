@@ -115,6 +115,8 @@ void Client::makeProtocol() {
 			callCommand()->cmdNotice(tokens, this);
 		} else if (tokens[0] == "PRIVMSG") {
 			callCommand()->cmdPrivmsg(tokens, this);
+		// } else if (tokens[0] == "WHO") {
+		// 	callCommand()->cmdWho(tokens, this);
 		} else {
 			std::cout << RED "NOT OUR COMMAND" NC << std::endl;
 		}
