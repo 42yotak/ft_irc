@@ -39,6 +39,6 @@ std::vector<std::string>	split(std::string str, std::string delimiter) {
 		ret.push_back(str);
 		str.clear();
 	}
-	print_split(ret);
+	// print_split(ret);
 	return (ret);
 }

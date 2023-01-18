@@ -159,7 +159,7 @@ void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 
 	std::map<std::string, Channel *>::iterator channel = client->getChannels().begin();
 	std::map<std::string, Channel *>::iterator ite = client->getChannels().end();
-	std::string broadcastMsg(":" + client->getNickName() + " QUIT :Quit: " + cmd[1]);
+	std::string broadcastMsg(":" + client->getNickName() + " QUIT :Quit: " + cmd[1] + "\r\n");
 	while (channel != ite) {
 		(*channel).second->broadcast(client, broadcastMsg);
 		(*channel).second->removeClient(client->getFd());
@@ -247,7 +247,7 @@ void Command::cmdPart(std::vector<std::string> cmd, Client *client) {
 					chan->broadcast(NULL, (*it));
 				} else {
 					chan->broadcast(NULL, (*it));
-					chan->broadcast(NULL, " ");
+					chan->broadcast(NULL, " :");
 					chan->broadcast(NULL, cmd[2]);
 				}
 				chan->broadcast(NULL, "\r\n");

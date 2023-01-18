@@ -104,14 +104,16 @@ void Server::on(std::string port, std::string password) {
 					}
 				}
 			}
-
+		}
+		for (int fd = 0; fd < maxFd + 1; fd++) {
 			if (FD_ISSET(fd, &cpWriteFds)) {
 				std::map<int, Client*>::iterator clientIt = this->_clients.find(fd);
 				if (clientIt != this->_clients.end() && !clientIt->second->getBufWrite().empty()) {
 					this->servSend(fd, clientIt->second->getBufWrite());
 					clientIt->second->clearBufWrite();
-					if (clientIt->second->getIsDead())
+					if (clientIt->second->getIsDead()) {
 						removeClient(fd);
+					}
 				}
 			}
 		}
@@ -155,7 +157,8 @@ int Server::servRecv(int fd, std::string &buf_read) {
 
 void Server::servSend(int fd, std::string &buf_write) {
 	try {
-		std::cout << YELLOW << buf_write << NC << std::endl;
+		std::cout << YELLOW << "fd[" << fd << "] "; 
+		std::cout << buf_write << NC << std::endl;
 		if (send(fd, buf_write.c_str(), buf_write.length(), 0) == ERROR) {
 			throw std::runtime_error("send message");
 		}
