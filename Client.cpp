@@ -19,10 +19,19 @@ Client::Client(int fd) {
 }
 
 Client::~Client() {
-	this->_isDead = true;
+	
+	std::map<std::string, Channel *>::iterator channel = this->getChannels().begin();
+	std::map<std::string, Channel *>::iterator ite = this->getChannels().end();
+	std::string broadcastMsg(":" + this->getNickName() + " QUIT :Quit: leaving" + "\r\n");
+	while (channel != ite) {
+		(*channel).second->broadcast(this, broadcastMsg);
+		(*channel).second->removeClient(this->getFd());
+		++channel;
+	}
 	this->_channels.clear();
 	this->clearBufRead();
 	this->clearBufWrite();
+	this->_isDead = true; // 클라이언트가 없어져서 isdead확인이 안되기 때문에 문제가,,,쓰읍
 }
 
 std::string &Client::getBufRead() {
@@ -114,8 +123,6 @@ void Client::makeProtocol() {
 			callCommand()->cmdNotice(tokens, this);
 		} else if (tokens[0] == "PRIVMSG") {
 			callCommand()->cmdPrivmsg(tokens, this);
-		// } else if (tokens[0] == "WHO") {
-		// 	callCommand()->cmdWho(tokens, this);
 		} else {
 			std::cout << RED "NOT OUR COMMAND" NC << std::endl;
 		}

@@ -158,7 +158,7 @@ int Server::servRecv(int fd, std::string &buf_read) {
 void Server::servSend(int fd, std::string &buf_write) {
 	try {
 		std::cout << YELLOW << "fd[" << fd << "] "; 
-		std::cout << buf_write << NC << std::endl;
+		std::cout << buf_write << NC << "\n";
 		if (send(fd, buf_write.c_str(), buf_write.length(), 0) == ERROR) {
 			throw std::runtime_error("send message");
 		}
@@ -195,6 +195,12 @@ Client* Server::getClient(const std::string& nick) {
 void Server::removeClient(int fd) {
 	std::map<int, Client *>::iterator it = this->_clients.find(fd);
 	if (it != this->_clients.end()) {
+		std::map<std::string, Channel *>::iterator channel = it->second->getChannels().begin();
+		std::map<std::string, Channel *>::iterator ite = it->second->getChannels().end();
+		while (channel != ite) {
+			(*channel).second->removeClient(it->second->getFd());
+			++channel;
+		}
 		delete (*it).second;
 		this->_clients.erase(it);
 		close(fd);
@@ -202,6 +208,7 @@ void Server::removeClient(int fd) {
 		FD_CLR(fd, &this->_writeFds);
 	}
 	std::cout << RED "remove client end" NC << std::endl;
+
 }
 
 bool Server::isUsedNickname(const std::string &nick) {

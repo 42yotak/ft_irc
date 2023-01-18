@@ -162,7 +162,6 @@ void Command::cmdQuit(std::vector<std::string> cmd, Client *client) {
 	std::string broadcastMsg(":" + client->getNickName() + " QUIT :Quit: " + cmd[1] + "\r\n");
 	while (channel != ite) {
 		(*channel).second->broadcast(client, broadcastMsg);
-		(*channel).second->removeClient(client->getFd());
 		++channel;
 	}
 	client->setIsDead();

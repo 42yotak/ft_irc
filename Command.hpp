@@ -16,7 +16,6 @@ class Command {
 		void cmdUser(std::vector<std::string> cmd, Client *client);
 		void cmdPing(std::vector<std::string> cmd, Client *client);
 		void cmdQuit(std::vector<std::string> cmd, Client *client);
-		// void cmdWho(std::vector<std::string> cmd, Client *client);
 
 		void cmdJoin(std::vector<std::string> cmd, Client *client);
 		void cmdPart(std::vector<std::string> cmd, Client *client);
