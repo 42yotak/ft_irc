@@ -114,7 +114,7 @@ void Client::makeProtocol() {
 		} else if (tokens[0] == "PRIVMSG") {
 			callCommand()->cmdPrivmsg(tokens, this);
 		} else {
-			std::cout << RED "NOT OUR COMMAND" NC << std::endl;
+			std::cout << "NOT OUR COMMAND\n";
 		}
 	}
 }
