@@ -199,7 +199,7 @@ void Server::removeClient(int fd) {
 		std::map<std::string, Channel *>::iterator ite = it->second->getChannels().end();
 		while (channel != ite) {
 			(*channel).second->removeClient(it->second->getFd());
-			if (it->second->getIsDead() != false)
+			if (it->second->getIsDead() == false)
 				(*channel).second->broadcast(it->second, std::string(":") + it->second->getNickName() + std::string(" QUIT :Quit: leaving\r\n"));
 			++channel;
 		}
