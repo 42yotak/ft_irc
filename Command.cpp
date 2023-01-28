@@ -372,7 +372,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			if (cmd[2] == BOT) {
 				/* 🤖 bot 🤖 */
 				chanIt->second->broadcast(NULL, ":");
-				chanIt->second->broadcast(NULL, client->getNickName());
+				chanIt->second->broadcast(NULL, BOT);
 				chanIt->second->broadcast(NULL, " PRIVMSG ");
 				chanIt->second->broadcast(NULL, *target);
 				chanIt->second->broadcast(NULL, " :");
@@ -397,23 +397,6 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			receiver->setBufWrite(" :");
 			receiver->setBufWrite(cmd[2]);
 			receiver->setBufWrite("\r\n");
-			if (cmd[2] == BOT) {
-				/* 🤖 bot 🤖 */
-				client->setBufWrite(":");
-				client->setBufWrite(client->getNickName());
-				client->setBufWrite(" PRIVMSG ");
-				client->setBufWrite(*target);
-				client->setBufWrite(" :");
-				client->setBufWrite(BOTMSG);
-
-				receiver->setBufWrite(":");
-				receiver->setBufWrite(client->getNickName());
-				receiver->setBufWrite(" PRIVMSG ");
-				receiver->setBufWrite(*target);
-				receiver->setBufWrite(" :");
-				receiver->setBufWrite(BOTMSG);
-				continue;
-			}
 		}
 	}
 }
