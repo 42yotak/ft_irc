@@ -366,7 +366,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			chanIt->second->broadcast(client, client->getNickName());
 			chanIt->second->broadcast(client, " PRIVMSG ");
 			chanIt->second->broadcast(client, *target);
-			chanIt->second->broadcast(client, " ");
+			chanIt->second->broadcast(client, " :");
 			chanIt->second->broadcast(client, cmd[2]);
 			chanIt->second->broadcast(client, "\r\n");
 		} else {
@@ -384,7 +384,7 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			receiver->setBufWrite(client->getNickName());
 			receiver->setBufWrite(" PRIVMSG ");
 			receiver->setBufWrite(*target);
-			receiver->setBufWrite(" ");
+			receiver->setBufWrite(" :");
 			receiver->setBufWrite(cmd[2]);
 			receiver->setBufWrite("\r\n");
 		}
