@@ -369,6 +369,16 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			chanIt->second->broadcast(client, " :");
 			chanIt->second->broadcast(client, cmd[2]);
 			chanIt->second->broadcast(client, "\r\n");
+			if (cmd[2] == BOT) {
+				/* 🤖 bot 🤖 */
+				chanIt->second->broadcast(NULL, ":");
+				chanIt->second->broadcast(NULL, client->getNickName());
+				chanIt->second->broadcast(NULL, " PRIVMSG ");
+				chanIt->second->broadcast(NULL, *target);
+				chanIt->second->broadcast(NULL, " :");
+				chanIt->second->broadcast(NULL, BOTMSG);
+				continue;
+			}
 		} else {
 			//401 yotak #4242cluster2 :No such nick/channel
 			if (!Server::callServer().isUsedNickname(*target)) {
@@ -387,6 +397,23 @@ void Command::cmdPrivmsg(std::vector<std::string> cmd, Client *client) {
 			receiver->setBufWrite(" :");
 			receiver->setBufWrite(cmd[2]);
 			receiver->setBufWrite("\r\n");
+			if (cmd[2] == BOT) {
+				/* 🤖 bot 🤖 */
+				client->setBufWrite(":");
+				client->setBufWrite(client->getNickName());
+				client->setBufWrite(" PRIVMSG ");
+				client->setBufWrite(*target);
+				client->setBufWrite(" :");
+				client->setBufWrite(BOTMSG);
+
+				receiver->setBufWrite(":");
+				receiver->setBufWrite(client->getNickName());
+				receiver->setBufWrite(" PRIVMSG ");
+				receiver->setBufWrite(*target);
+				receiver->setBufWrite(" :");
+				receiver->setBufWrite(BOTMSG);
+				continue;
+			}
 		}
 	}
 }

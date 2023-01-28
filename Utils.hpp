@@ -12,6 +12,9 @@
 
 #define SERVER_NAME "PokémonGo"
 
+#define BOT "42bot"
+#define BOTMSG "\e[0;94m42 Seoul introduction can be found at the following. 'https://42seoul.kr'\e[0;97m\r\n"
+
 class Command;
 
 Command *callCommand();
