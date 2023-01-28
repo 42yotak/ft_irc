@@ -24,6 +24,7 @@ void print_split(std::vector<std::string> str) {
 }
 
 std::vector<std::string>	split(std::string str, std::string delimiter) {
+	std::cout << GREEN << str << NC << std::endl;
 	std::vector<std::string> ret;
 	size_t pos = 0;
 	while ((pos = str.find(delimiter)) != std::string::npos) {
@@ -36,9 +37,15 @@ std::vector<std::string>	split(std::string str, std::string delimiter) {
 		str.erase(0, pos + delimiter.length());
 	}
 	if (!str.empty()) {
-		ret.push_back(str);
-		str.clear();
+		if (str[0] == ':') {
+			ret.push_back(str.substr(1, std::string::npos));
+			str.clear();
+		}
+		else {
+			ret.push_back(str);
+			str.clear();
+		}
 	}
-	// print_split(ret);
+	print_split(ret);
 	return (ret);
 }
